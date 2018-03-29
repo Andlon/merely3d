@@ -1,5 +1,15 @@
 cmake_minimum_required(VERSION 3.0)
 
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+add_subdirectory("extern/glfw-3.2.1")
+
+find_package(OpenGL REQUIRED)
+
 set(LIB_FILES src/main.cpp)
 
-find_package(glfw3 3.2 REQUIRED)
+add_executable(merely ${LIB_FILES})
+
+target_include_directories(merely SYSTEM PRIVATE ${OPENGL_INCLUDE_DIR})
+target_link_libraries(merely glfw ${OPENGL_gl_LIBRARY})
