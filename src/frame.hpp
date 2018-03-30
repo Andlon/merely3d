@@ -3,6 +3,9 @@
 #include "types.hpp"
 #include "material.hpp"
 
+// TODO: Use pimpl to avoid these includes, see below
+#include <vector>
+
 namespace merely3d
 {
     class Frame
@@ -17,8 +20,22 @@ namespace merely3d
                       const Material & material = Material());
 
     private:
+        void clear();
+
         Frame() {}
         ~Frame() {}
         friend class Window;
+
+        // TODO: Use impl to hide Frame implementation details
+
+        struct Box
+        {
+            Vector3     half_extents;
+            Position    position;
+            Orientation orientation;
+            Material    material;
+        };
+
+        std::vector<Box> _boxes;
     };
 }
