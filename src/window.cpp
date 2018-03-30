@@ -26,6 +26,13 @@ bool Window::should_close() const
 
 Window WindowBuilder::build() const
 {
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    // This is apparently needed on Mac OS X. Can we simply set it for all platforms...?
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+
     // TODO: Throw exception if creating the window fails (i.e. returns NULL)
     GLFWwindow * glfw_window = glfwCreateWindow(_width, _height, _title.c_str(), NULL, NULL);
     auto window_ptr = Window::GlfwWindowPtr(glfw_window, glfwDestroyWindow);
