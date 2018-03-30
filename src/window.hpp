@@ -1,13 +1,11 @@
 #pragma once
 
-// TODO: Can we use forward declarations instead of including GLFW explicitly?
-#include <GLFW/glfw3.h>
-
-
-
 #include <memory>
 
 #include "frame.hpp"
+
+// Forward declare GLFWwindow
+struct GLFWwindow;
 
 namespace merely3d
 {
