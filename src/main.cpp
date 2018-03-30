@@ -1,35 +1,35 @@
 #include <GLFW/glfw3.h>
 
+#include <memory>
+#include <iostream>
+
+#include "window.hpp"
+
+using merely3d::Window;
+using merely3d::WindowBuilder;
+using merely3d::Frame;
+
+using merely3d::Position;
+using merely3d::Orientation;
+using merely3d::Vector3;
+
 int main(void)
 {
-    GLFWwindow* window;
-
     /* Initialize the library */
     if (!glfwInit())
         return -1;
 
-    /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
-    if (!window)
+    auto window = WindowBuilder()
+                    .dimensions(1024, 768)
+                    .title("Hello merely3d!")
+                    .build();
+
+    while (!window.should_close())
     {
-        glfwTerminate();
-        return -1;
-    }
-
-    /* Make the window's context current */
-    glfwMakeContextCurrent(window);
-
-    /* Loop until the user closes the window */
-    while (!glfwWindowShouldClose(window))
-    {
-        /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        /* Swap front and back buffers */
-        glfwSwapBuffers(window);
-
-        /* Poll for and process events */
-        glfwPollEvents();
+        window.render_frame([] (Frame & frame)
+        {
+            frame.draw_box(Vector3(1.0, 1.0, 1.0), Position::Zero(), Orientation::Identity());
+        });
     }
 
     glfwTerminate();

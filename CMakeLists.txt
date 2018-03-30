@@ -6,10 +6,19 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory("extern/glfw-3.2.1")
 
 find_package(OpenGL REQUIRED)
+find_package(Eigen3 3 REQUIRED NO_MODULE)
 
-set(LIB_FILES src/main.cpp)
+set(LIB_FILES
+    src/main.cpp
+    src/window.hpp
+    src/window.cpp
+    src/frame.hpp
+    src/frame.cpp
+    src/types.hpp
+    src/material.hpp)
 
 add_executable(merely ${LIB_FILES})
 
 target_include_directories(merely SYSTEM PRIVATE ${OPENGL_INCLUDE_DIR})
 target_link_libraries(merely glfw ${OPENGL_gl_LIBRARY})
+target_link_libraries(merely Eigen3::Eigen)
