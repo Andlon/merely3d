@@ -17,17 +17,19 @@ set(GLAD_FILES
 add_library(glad STATIC ${GLAD_FILES})
 target_include_directories(glad SYSTEM PUBLIC extern/glad/include)
 
+set(LIB_HEADERS
+    include/merely3d/window.hpp
+    include/merely3d/frame.hpp
+    include/merely3d/types.hpp
+    include/merely3d/material.hpp)
 set(LIB_FILES
     src/main.cpp
-    src/window.hpp
     src/window.cpp
-    src/frame.hpp
-    src/frame.cpp
-    src/types.hpp
-    src/material.hpp)
+    src/frame.cpp)
 
-add_executable(merely ${LIB_FILES})
+add_executable(merely ${LIB_FILES} ${LIB_HEADERS})
 
 target_include_directories(merely SYSTEM PRIVATE ${OPENGL_INCLUDE_DIR})
+target_include_directories(merely SYSTEM PUBLIC include)
 target_link_libraries(merely glad glfw ${OPENGL_gl_LIBRARY})
 target_link_libraries(merely Eigen3::Eigen)

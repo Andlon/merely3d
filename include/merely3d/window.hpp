@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "frame.hpp"
+#include <merely3d/frame.hpp>
 
 // Forward declare GLFWwindow
 struct GLFWwindow;

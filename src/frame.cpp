@@ -1,4 +1,4 @@
-#include "frame.hpp"
+#include <merely3d/frame.hpp>
 
 namespace merely3d
 {

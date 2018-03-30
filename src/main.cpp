@@ -3,7 +3,7 @@
 #include <memory>
 #include <iostream>
 
-#include "window.hpp"
+#include <merely3d/window.hpp>
 
 using merely3d::Window;
 using merely3d::WindowBuilder;

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "types.hpp"
-#include "material.hpp"
+#include <merely3d/types.hpp>
+#include <merely3d/material.hpp>
 
 // TODO: Use pimpl to avoid these includes, see below
 #include <vector>
