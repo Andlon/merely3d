@@ -29,6 +29,7 @@ namespace merely3d
         if (!success)
         {
             char info_log[512];
+            glGetShaderInfoLog(shader_id, 512, NULL, info_log);
             std::string error_msg(info_log);
             throw std::runtime_error("Shader compilation error: " + error_msg);
         }

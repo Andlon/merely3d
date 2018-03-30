@@ -3,6 +3,28 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "shader.hpp"
+
+const std::string DEFAULT_VSHADER =
+"#version 330 core                                       \n"
+"layout (location = 0) in vec3 aPos;                     \n"
+"                                                        \n"
+"void main()                                             \n"
+"{                                                       \n"
+"    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);    \n"
+"}                                                       \n"
+;
+
+const std::string DEFAULT_FSHADER=
+"#version 330 core                                       \n"
+"out vec4 FragColor;                                     \n"
+"                                                        \n"
+"void main()                                             \n"
+"{                                                       \n"
+"   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);            \n"
+"}                                                       \n"
+;
+
 typedef void(*GlfwWindowDestroyFunc)(GLFWwindow *);
 typedef std::unique_ptr<GLFWwindow, GlfwWindowDestroyFunc> GlfwWindowPtr;
 
@@ -11,10 +33,15 @@ namespace merely3d
     class Window::WindowData
     {
     public:
-        WindowData(GlfwWindowPtr ptr) : glfw_window(std::move(ptr)), viewport_size(0, 0) {}
+        WindowData(GlfwWindowPtr ptr, ShaderProgram program)
+            : glfw_window(std::move(ptr)),
+              default_program(std::move(program)),
+              viewport_size(0, 0) {}
 
         GlfwWindowPtr glfw_window;
         std::pair<int, int> viewport_size;
+
+        ShaderProgram default_program;
     };
 
     static void check_and_update_viewport_size(GLFWwindow * window, int & viewport_width, int & viewport_height)
@@ -106,10 +133,15 @@ namespace merely3d
             throw std::runtime_error("Failed to initialize GLAD");
         }
 
+        const auto fragment_shader = Shader::compile(ShaderType::Fragment, DEFAULT_FSHADER);
+        const auto vertex_shader = Shader::compile(ShaderType::Vertex, DEFAULT_VSHADER);
+        auto default_program = ShaderProgram::create();
+        default_program.attach(fragment_shader);
+        default_program.attach(vertex_shader);
+        default_program.link();
+
         auto window_ptr = GlfwWindowPtr(glfw_window, glfwDestroyWindow);
-
-        auto window_data = new Window::WindowData(std::move(window_ptr));
-
+        auto window_data = new Window::WindowData(std::move(window_ptr), std::move(default_program));
         auto window = Window(window_data);
         return std::move(window);
     }

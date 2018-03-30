@@ -15,18 +15,14 @@ namespace merely3d
     class Shader
     {
     public:
-
-    private:
-        Shader() : _id(0) {}
-
         /// Compiles the shader, provided as source code in a string.
         ///
         /// Note that the correct context *must* have been set before compiling the shader.
         static Shader compile(ShaderType type, const std::string & source);
 
     private:
+        Shader() : _id(0) {}
         GLuint _id;
-
         friend class ShaderProgram;
     };
 
@@ -34,6 +30,9 @@ namespace merely3d
     class ShaderProgram
     {
     public:
+        ShaderProgram(const ShaderProgram &) = delete;
+
+        ShaderProgram(ShaderProgram &&) = default;
 
         /// Creates a new shader program. The context *must* have correctly been set beforehand.
         static ShaderProgram create();
@@ -48,6 +47,8 @@ namespace merely3d
         void use();
 
     private:
+        ShaderProgram() : _id(0) {}
+
         GLuint _id;
     };
 }
