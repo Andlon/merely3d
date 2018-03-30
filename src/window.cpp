@@ -1,5 +1,6 @@
 #include "window.hpp"
 
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 namespace merely3d
@@ -33,8 +34,23 @@ Window WindowBuilder::build() const
     // This is apparently needed on Mac OS X. Can we simply set it for all platforms...?
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-    // TODO: Throw exception if creating the window fails (i.e. returns NULL)
     GLFWwindow * glfw_window = glfwCreateWindow(_width, _height, _title.c_str(), NULL, NULL);
+
+    if (!glfw_window)
+    {
+        // TODO: Better error, more information
+        throw std::runtime_error("Failed to initialize GLFWwindow");
+    }
+
+    // TODO: Should glad initialization happen in a different location...?
+    // Is it safe to re-initialize GLAD?
+    glfwMakeContextCurrent(glfw_window);
+    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
+    {
+        // TODO: Better error message
+        throw std::runtime_error("Failed to initialize GLAD");
+    }
+
     auto window_ptr = Window::GlfwWindowPtr(glfw_window, glfwDestroyWindow);
     auto window = Window(std::move(window_ptr));
     return std::move(window);
