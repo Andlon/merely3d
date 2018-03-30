@@ -25,7 +25,9 @@ set(LIB_HEADERS
 set(LIB_FILES
     src/main.cpp
     src/window.cpp
-    src/frame.cpp)
+    src/frame.cpp
+    src/shader.hpp
+    src/shader.cpp)
 
 add_executable(merely ${LIB_FILES} ${LIB_HEADERS})
 
