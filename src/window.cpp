@@ -17,4 +17,18 @@ void Window::render_frame_impl(Frame & frame)
     glfwPollEvents();
 }
 
+bool Window::should_close() const
+{
+    return glfwWindowShouldClose(_glfw_window.get());
+}
+
+Window WindowBuilder::build() const
+{
+    // TODO: Throw exception if creating the window fails (i.e. returns NULL)
+    GLFWwindow * glfw_window = glfwCreateWindow(_width, _height, _title.c_str(), NULL, NULL);
+    auto window_ptr = Window::GlfwWindowPtr(glfw_window, glfwDestroyWindow);
+    auto window = Window(std::move(window_ptr));
+    return std::move(window);
+}
+
 }

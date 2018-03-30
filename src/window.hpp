@@ -27,10 +27,7 @@ namespace merely3d
 
         }
 
-        bool should_close() const
-        {
-            return glfwWindowShouldClose(_glfw_window.get());
-        }
+        bool should_close() const;
 
         template <typename RenderFunc>
         void render_frame(RenderFunc && render_func)
@@ -83,14 +80,7 @@ namespace merely3d
             return result;
         }
 
-        Window build() const
-        {
-            // TODO: Throw exception if creating the window fails (i.e. returns NULL)
-            GLFWwindow * glfw_window = glfwCreateWindow(_width, _height, _title.c_str(), NULL, NULL);
-            auto window_ptr = Window::GlfwWindowPtr(glfw_window, glfwDestroyWindow);
-            auto window = Window(std::move(window_ptr));
-            return std::move(window);
-        }
+        Window build() const;
 
     private:
         int         _width;
