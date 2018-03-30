@@ -15,7 +15,8 @@ namespace merely3d
 
         // TODO: Can we use a default move constructor here?
         Window(Window && other)
-            : _glfw_window(std::move(other._glfw_window))
+            : _glfw_window(std::move(other._glfw_window)),
+              _viewport_size(other._viewport_size)
         {
 
         }
