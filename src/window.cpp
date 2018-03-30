@@ -3,8 +3,20 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+typedef void(*GlfwWindowDestroyFunc)(GLFWwindow *);
+typedef std::unique_ptr<GLFWwindow, GlfwWindowDestroyFunc> GlfwWindowPtr;
+
 namespace merely3d
 {
+    class Window::WindowData
+    {
+    public:
+        WindowData(GlfwWindowPtr ptr) : glfw_window(std::move(ptr)), viewport_size(0, 0) {}
+
+        GlfwWindowPtr glfw_window;
+        std::pair<int, int> viewport_size;
+    };
+
     static void check_and_update_viewport_size(GLFWwindow * window, int & viewport_width, int & viewport_height)
     {
         int fb_width;
@@ -19,11 +31,36 @@ namespace merely3d
         }
     }
 
+    Window::Window(Window && other)
+        : _d(nullptr)
+    {
+        if (other._d)
+        {
+            _d = other._d;
+            other._d = nullptr;
+        }
+    }
+
+    Window::~Window()
+    {
+        if (_d)
+        {
+            delete _d;
+        }
+    }
+
+    Window::Window(WindowData * data)
+    {
+        assert(data);
+        _d = data;
+    }
+
     void Window::render_frame_impl(Frame & frame)
     {
-        glfwMakeContextCurrent(_glfw_window.get());
+        assert(_d);
+        glfwMakeContextCurrent(_d->glfw_window.get());
 
-        check_and_update_viewport_size(_glfw_window.get(), _viewport_size.first, _viewport_size.second);
+        check_and_update_viewport_size(_d->glfw_window.get(), _d->viewport_size.first, _d->viewport_size.second);
 
         // TODO: Make clear color configurable
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -32,7 +69,7 @@ namespace merely3d
         // TODO: Process resulting command buffer from Frame
 
         /* Swap front and back buffers */
-        glfwSwapBuffers(_glfw_window.get());
+        glfwSwapBuffers(_d->glfw_window.get());
 
         /* Poll for and process events */
         glfwPollEvents();
@@ -40,7 +77,7 @@ namespace merely3d
 
     bool Window::should_close() const
     {
-        return glfwWindowShouldClose(_glfw_window.get());
+        return glfwWindowShouldClose(_d->glfw_window.get());
     }
 
     Window WindowBuilder::build() const
@@ -69,8 +106,11 @@ namespace merely3d
             throw std::runtime_error("Failed to initialize GLAD");
         }
 
-        auto window_ptr = Window::GlfwWindowPtr(glfw_window, glfwDestroyWindow);
-        auto window = Window(std::move(window_ptr));
+        auto window_ptr = GlfwWindowPtr(glfw_window, glfwDestroyWindow);
+
+        auto window_data = new Window::WindowData(std::move(window_ptr));
+
+        auto window = Window(window_data);
         return std::move(window);
     }
 

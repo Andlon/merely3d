@@ -4,27 +4,14 @@
 
 #include <merely3d/frame.hpp>
 
-// Forward declare GLFWwindow
-struct GLFWwindow;
-
 namespace merely3d
 {
-    class Window
+    class Window final
     {
     public:
+        Window(Window && other);
 
-        // TODO: Can we use a default move constructor here?
-        Window(Window && other)
-            : _glfw_window(std::move(other._glfw_window)),
-              _viewport_size(other._viewport_size)
-        {
-
-        }
-
-        ~Window()
-        {
-
-        }
+        ~Window();
 
         bool should_close() const;
 
@@ -38,23 +25,14 @@ namespace merely3d
         }
 
     private:
+        friend class WindowBuilder;
+        class WindowData;
+
+        Window(WindowData * data);
+
         void render_frame_impl(Frame & frame);
 
-        typedef void(*GlfwWindowDestroyFunc)(GLFWwindow *);
-        typedef std::unique_ptr<GLFWwindow, GlfwWindowDestroyFunc> GlfwWindowPtr;
-
-        Window(GlfwWindowPtr glfw_window)
-            : _glfw_window(std::move(glfw_window)),
-              _viewport_size(0, 0)
-        {
-
-        }
-
-        friend class WindowBuilder;
-
-        GlfwWindowPtr _glfw_window;
-
-        std::pair<int, int> _viewport_size;
+        WindowData * _d;
     };
 
     class WindowBuilder
