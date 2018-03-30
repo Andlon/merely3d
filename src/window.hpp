@@ -43,7 +43,8 @@ namespace merely3d
         typedef std::unique_ptr<GLFWwindow, GlfwWindowDestroyFunc> GlfwWindowPtr;
 
         Window(GlfwWindowPtr glfw_window)
-            : _glfw_window(std::move(glfw_window))
+            : _glfw_window(std::move(glfw_window)),
+              _viewport_size(0, 0)
         {
 
         }
@@ -51,6 +52,8 @@ namespace merely3d
         friend class WindowBuilder;
 
         GlfwWindowPtr _glfw_window;
+
+        std::pair<int, int> _viewport_size;
     };
 
     class WindowBuilder

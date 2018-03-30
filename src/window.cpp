@@ -5,10 +5,28 @@
 
 namespace merely3d
 {
+    static void check_and_update_viewport_size(GLFWwindow * window, int & viewport_width, int & viewport_height)
+    {
+        int fb_width;
+        int fb_height;
+        glfwGetFramebufferSize(window, &fb_width, &fb_height);
+
+        if (fb_width != viewport_width || fb_height != viewport_height)
+        {
+            viewport_width = fb_width;
+            viewport_height = fb_height;
+            glViewport(0, 0, viewport_width, viewport_height);
+        }
+    }
 
 void Window::render_frame_impl(Frame & frame)
 {
     glfwMakeContextCurrent(_glfw_window.get());
+
+    check_and_update_viewport_size(_glfw_window.get(), _viewport_size.first, _viewport_size.second);
+
+    // TODO: Make clear color configurable
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     // TODO: Process resulting command buffer from Frame
