@@ -28,6 +28,32 @@ const std::string DEFAULT_FSHADER=
 typedef void(*GlfwWindowDestroyFunc)(GLFWwindow *);
 typedef std::unique_ptr<GLFWwindow, GlfwWindowDestroyFunc> GlfwWindowPtr;
 
+namespace
+{
+    /// Returns the vertices of the unit rectangle,
+    /// defined to lie in the xy-plane (z = 0),
+    /// centered at (0, 0, 0) and with unit length sides.
+    std::vector<float> unit_rectangle_vertices()
+    {
+        return {
+             0.5, -0.5, 0.0,
+             0.5,  0.5, 0.0,
+            -0.5,  0.5, 0.0,
+            -0.5, -0.5, 0.0
+        };
+    }
+
+    /// Returns the indices corresponding to the vertices
+    /// obtained from unit_rectangle_vertices.
+    std::vector<unsigned int> unit_rectangle_indices()
+    {
+        return {
+             0, 1, 2,
+             2, 3, 0
+        };
+    }
+}
+
 namespace merely3d
 {
     class Window::WindowData
@@ -36,12 +62,19 @@ namespace merely3d
         WindowData(GlfwWindowPtr ptr, ShaderProgram program)
             : glfw_window(std::move(ptr)),
               default_program(std::move(program)),
-              viewport_size(0, 0) {}
+              viewport_size(0, 0),
+              rectangle_vbo(0),
+              rectangle_vao(0),
+              rectangle_ebo(0) {}
 
         GlfwWindowPtr glfw_window;
         std::pair<int, int> viewport_size;
 
         ShaderProgram default_program;
+
+        GLuint rectangle_vbo;
+        GLuint rectangle_vao;
+        GLuint rectangle_ebo;
     };
 
     static void check_and_update_viewport_size(GLFWwindow * window, int & viewport_width, int & viewport_height)
@@ -70,8 +103,14 @@ namespace merely3d
 
     Window::~Window()
     {
+        // Must check for valid data because data might have been moved
         if (_d)
         {
+            // TODO: Destroy ALL vertex buffers/objects and so forth
+            glfwMakeContextCurrent(_d->glfw_window.get());
+            glDeleteVertexArrays(1, &_d->rectangle_vao);
+            glDeleteBuffers(1, &_d->rectangle_vbo);
+            glDeleteBuffers(1, &_d->rectangle_ebo);
             delete _d;
         }
     }
@@ -94,6 +133,15 @@ namespace merely3d
         glClear(GL_COLOR_BUFFER_BIT);
 
         // TODO: Process resulting command buffer from Frame
+
+        _d->default_program.use();
+
+        for (const auto & rectangle : frame._rectangles)
+        {
+            glBindVertexArray(_d->rectangle_vao);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        }
 
         /* Swap front and back buffers */
         glfwSwapBuffers(_d->glfw_window.get());
@@ -140,8 +188,27 @@ namespace merely3d
         default_program.attach(vertex_shader);
         default_program.link();
 
+        // Construct VBO and VAO for the unit rectangle
+        const auto rect_verts = unit_rectangle_vertices();
+        const auto rect_idx = unit_rectangle_indices();
+
+        // TODO: Encapsulate state of primitives in a separate class
+        GLuint rect_vao, rect_vbo, rect_ebo;
+        glGenVertexArrays(1, &rect_vao);
+        glBindVertexArray(rect_vao);
+        glGenBuffers(1, &rect_vbo);
+        glGenBuffers(1, &rect_ebo);
+        glBindBuffer(GL_ARRAY_BUFFER, rect_vbo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rect_ebo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rect_verts.size(), rect_verts.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * rect_idx.size(), rect_idx.data(), GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+        glEnableVertexAttribArray(0);
+
         auto window_ptr = GlfwWindowPtr(glfw_window, glfwDestroyWindow);
         auto window_data = new Window::WindowData(std::move(window_ptr), std::move(default_program));
+        window_data->rectangle_vao = rect_vao;
+        window_data->rectangle_vbo = rect_vbo;
         auto window = Window(window_data);
         return std::move(window);
     }

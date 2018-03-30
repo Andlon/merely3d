@@ -65,4 +65,9 @@ namespace merely3d
             throw std::runtime_error("Program link error: " + error_msg);
         }
     }
+
+    void ShaderProgram::use()
+    {
+        glUseProgram(_id);
+    }
 }

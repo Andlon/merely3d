@@ -17,6 +17,33 @@ namespace merely3d
         box.position = position;
         box.orientation = orientation;
         box.material = material;
-        _boxes.push_back(std::move(box));
+        _boxes.push_back(box);
+    }
+
+    void Frame::draw_triangle(const Position &a, const Position & b, const Position & c,
+                              const Position & position, const Orientation & orientation,
+                              const Material & material)
+    {
+        Triangle triangle;
+        triangle.a = a;
+        triangle.b = b;
+        triangle.c = c;
+        triangle.position = position;
+        triangle.orientation = orientation;
+        triangle.material = material;
+        _triangles.push_back(triangle);
+    }
+
+    void Frame::draw_rectangle(const Vector2 & half_extents,
+                        const Position & position,
+                        const Orientation & orientation,
+                        const Material & material)
+    {
+        Rectangle rectangle;
+        rectangle.half_extents = half_extents;
+        rectangle.position = position;
+        rectangle.orientation = orientation;
+        rectangle.material = material;
+        _rectangles.push_back(rectangle);
     }
 }

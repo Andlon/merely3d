@@ -12,6 +12,7 @@ using merely3d::Frame;
 using merely3d::Position;
 using merely3d::Orientation;
 using merely3d::Vector3;
+using merely3d::Vector2;
 
 int main(void)
 {
@@ -19,17 +20,20 @@ int main(void)
     if (!glfwInit())
         return -1;
 
-    auto window = WindowBuilder()
+    // Scope is necessary because Window calls GL destructors in constructor
+    {
+        auto window = WindowBuilder()
                     .dimensions(1024, 768)
                     .title("Hello merely3d!")
                     .build();
 
-    while (!window.should_close())
-    {
-        window.render_frame([] (Frame & frame)
+        while (!window.should_close())
         {
-            frame.draw_box(Vector3(1.0, 1.0, 1.0), Position::Zero(), Orientation::Identity());
-        });
+            window.render_frame([] (Frame & frame)
+            {
+                frame.draw_rectangle(Vector2(0.5, 0.5), Position::Zero(), Orientation::Identity());
+            });
+        }
     }
 
     glfwTerminate();
