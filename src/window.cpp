@@ -3,15 +3,21 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <iostream>
+
 #include "shader.hpp"
 
 const std::string DEFAULT_VSHADER =
 "#version 330 core                                       \n"
 "layout (location = 0) in vec3 aPos;                     \n"
 "                                                        \n"
+"uniform mat4 projection;                                \n"
+"uniform mat4 modelview;                                 \n"
+"                                                        \n"
 "void main()                                             \n"
 "{                                                       \n"
-"    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);    \n"
+"    vec4 model_pos = vec4(aPos, 1.0);                   \n"
+"    gl_Position = projection * modelview * model_pos;   \n"
 "}                                                       \n"
 ;
 
@@ -24,6 +30,30 @@ const std::string DEFAULT_FSHADER=
 "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);            \n"
 "}                                                       \n"
 ;
+
+Eigen::Matrix4f projection_matrix(float fov, float aspect_ratio, float near_plane_dist)
+{
+    assert(fov > 0.0);
+    assert(aspect_ratio > 0.0);
+    assert(near_plane_dist > 0.0);
+    const auto n = near_plane_dist;
+
+    // Note: this is the perspective matrix with the far plane infinitely far away.
+    // It will likely suffer some depth precision issues at large distances.
+    // An interesting way to remedy this would be to follow the suggestion in the
+    // following blogpost: https://chaosinmotion.blog/2010/09/06/goodbye-far-clipping-plane/
+    // Essentially, there it's advocated to use a projection matrix which projects the far plane
+    // (which is infinitely far away) onto z = 0, rather than z = 1. Floating point numbers are
+    // able to represent numbers close to 0 much better than numbers close to 1,
+    // so the end effect is a much more precise result. This would require setting the
+    // clip plane in OpenGL through glClipPlane, however.
+    Eigen::Matrix4f p;
+    p << (fov / aspect_ratio), 0.0,  0.0,      0.0,
+                          0.0, fov,  0.0,      0.0,
+                          0.0, 0.0, -1.0, -2.0 * n,
+                          0.0, 0.0, -1.0,      0.0;
+    return p;
+}
 
 typedef void(*GlfwWindowDestroyFunc)(GLFWwindow *);
 typedef std::unique_ptr<GLFWwindow, GlfwWindowDestroyFunc> GlfwWindowPtr;
@@ -126,20 +156,40 @@ namespace merely3d
         assert(_d);
         glfwMakeContextCurrent(_d->glfw_window.get());
 
-        check_and_update_viewport_size(_d->glfw_window.get(), _d->viewport_size.first, _d->viewport_size.second);
+        check_and_update_viewport_size(_d->glfw_window.get(),
+                                       _d->viewport_size.first,
+                                       _d->viewport_size.second);
 
         // TODO: Make clear color configurable
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         // TODO: Process resulting command buffer from Frame
+        auto & program = _d->default_program;
 
-        _d->default_program.use();
+        program.use();
+
+        // TODO: this should be done once, at the time when the
+        // program is created
+        const auto projection_loc = program.get_uniform_loc("projection");
+        const auto modelview_loc = program.get_uniform_loc("modelview");
+
+        const auto viewport_width = static_cast<float>(_d->viewport_size.first);
+        const auto viewport_height = static_cast<float>(_d->viewport_size.second);
+
+        // Guard against zero width/height, which may technically be a valid state
+        const auto aspect_ratio = viewport_width > 0.0 && viewport_height > 0.0
+                                    ? viewport_width / viewport_height
+                                    : 1.0;
+        const auto projection = projection_matrix(0.785398, aspect_ratio, 0.1);
+
+        glBindVertexArray(_d->rectangle_vao);
 
         for (const auto & rectangle : frame._rectangles)
         {
-            glBindVertexArray(_d->rectangle_vao);
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            const Eigen::Affine3f & modelview = rectangle.transform;
+            program.set_mat4_uniform(projection_loc, projection.data());
+            program.set_mat4_uniform(modelview_loc, modelview.data());
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
         }
 

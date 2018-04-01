@@ -14,14 +14,14 @@ namespace merely3d
         Frame(const Frame &) = delete;
         Frame(Frame &&) = delete;
 
-        void draw_box(const Vector3 & half_extents,
-                      const Position & position,
-                      const Orientation & orientation,
-                      const Material & material = Material());
+        // void draw_box(const Vector3 & half_extents,
+        //               const Position & position,
+        //               const Orientation & orientation,
+        //               const Material & material = Material());
 
-        void draw_triangle(const Position &a, const Position & b, const Position & c,
-                           const Position & position, const Orientation & orientation,
-                           const Material & material = Material());
+        // void draw_triangle(const Position &a, const Position & b, const Position & c,
+        //                    const Position & position, const Orientation & orientation,
+        //                    const Material & material = Material());
 
         void draw_rectangle(const Vector2 & half_extents,
                             const Position & position,
@@ -37,35 +37,12 @@ namespace merely3d
 
         // TODO: Use impl to hide Frame implementation details
 
-        struct Box
+        struct Primitive
         {
-            Vector3     half_extents;
-            Position    position;
-            Orientation orientation;
-            Material    material;
+            Eigen::Affine3f transform;
+            Material        material;
         };
 
-        struct Triangle
-        {
-            Position a;
-            Position b;
-            Position c;
-
-            Position    position;
-            Orientation orientation;
-            Material    material;
-        };
-
-        struct Rectangle
-        {
-            Vector2      half_extents;
-            Position     position;
-            Orientation  orientation;
-            Material     material;
-        };
-
-        std::vector<Box>        _boxes;
-        std::vector<Triangle>   _triangles;
-        std::vector<Rectangle>  _rectangles;
+        std::vector<Primitive> _rectangles;
     };
 }

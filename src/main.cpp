@@ -31,7 +31,9 @@ int main(void)
         {
             window.render_frame([] (Frame & frame)
             {
-                frame.draw_rectangle(Vector2(0.5, 0.5), Position::Zero(), Orientation::Identity());
+                Orientation orientation = Orientation::Identity();
+                orientation = Eigen::AngleAxisf(0.78, Eigen::Vector3f(1.0, 0.0, 0.0));
+                frame.draw_rectangle(Vector2(0.5, 0.5), Position(0.0, 0.0, -1.0), orientation);
             });
         }
     }

@@ -46,6 +46,11 @@ namespace merely3d
         /// Makes GL use the current program. The context *must* have correctly been set beforehand.
         void use();
 
+        // TODO: This kinda breaks encapsulation, but this class needs a redesign in any case
+        GLint get_uniform_loc(const std::string & name) const;
+
+        void set_mat4_uniform(GLint location, const float * value);
+
     private:
         ShaderProgram() : _id(0) {}
 
