@@ -30,7 +30,9 @@ set(LIB_FILES
     src/frame.cpp
     src/shader.hpp
     src/shader.cpp
-    src/command_buffer.hpp)
+    src/command_buffer.hpp
+    src/renderer.hpp
+    src/renderer.cpp)
 
 add_executable(merely ${LIB_FILES} ${LIB_HEADERS})
 
