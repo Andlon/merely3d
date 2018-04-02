@@ -7,6 +7,8 @@
 
 namespace merely3d
 {
+    class CommandBuffer;
+
     class Window final
     {
     public:
@@ -19,8 +21,8 @@ namespace merely3d
         template <typename RenderFunc>
         void render_frame(RenderFunc && render_func)
         {
-            // TODO: Re-use last frame to be able to reuse buffers
-            Frame frame;
+            auto buffer = get_command_buffer();
+            Frame frame(buffer);
             std::forward<RenderFunc>(render_func)(frame);
             render_frame_impl(frame);
         }
@@ -35,6 +37,7 @@ namespace merely3d
         Window(WindowData * data);
 
         void render_frame_impl(Frame & frame);
+        CommandBuffer * get_command_buffer();
 
         WindowData * _d;
     };

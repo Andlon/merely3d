@@ -22,13 +22,15 @@ set(LIB_HEADERS
     include/merely3d/frame.hpp
     include/merely3d/types.hpp
     include/merely3d/material.hpp
-    include/merely3d/camera.hpp)
+    include/merely3d/camera.hpp
+    include/merely3d/primitives.hpp)
 set(LIB_FILES
     src/main.cpp
     src/window.cpp
     src/frame.cpp
     src/shader.hpp
-    src/shader.cpp)
+    src/shader.cpp
+    src/command_buffer.hpp)
 
 add_executable(merely ${LIB_FILES} ${LIB_HEADERS})
 

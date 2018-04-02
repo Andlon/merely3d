@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "shader.hpp"
+#include "command_buffer.hpp"
 
 const std::string DEFAULT_VSHADER =
 "#version 330 core                                       \n"
@@ -114,6 +115,8 @@ namespace merely3d
         GLuint rectangle_ebo;
 
         Camera camera;
+
+        CommandBuffer command_buffer;
     };
 
     static void check_and_update_viewport_size(GLFWwindow * window, int & viewport_width, int & viewport_height)
@@ -196,13 +199,20 @@ namespace merely3d
 
         const Eigen::Affine3f view = camera().transform().inverse();
 
-        for (const auto & rectangle : frame._rectangles)
+        // TODO: Move this into a dedicated renderer class
+        for (const auto & rectangle : _d->command_buffer.rectangles())
         {
-            const Eigen::Affine3f modelview = view * rectangle.transform;
+            const auto & extents = rectangle.shape.extents;
+            const auto scaling = Eigen::DiagonalMatrix<float, 3>(extents.x(), extents.y(), 0.0);
+            const Eigen::Affine3f transform = Eigen::Translation3f(rectangle.position) *  rectangle.orientation * scaling;
+
+            const Eigen::Affine3f modelview = view * transform;
             program.set_mat4_uniform(projection_loc, projection.data());
             program.set_mat4_uniform(modelview_loc, modelview.data());
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
         }
+
+        get_command_buffer()->clear();
 
         /* Swap front and back buffers */
         glfwSwapBuffers(_d->glfw_window.get());
@@ -224,6 +234,11 @@ namespace merely3d
     const Camera & Window::camera() const
     {
         return _d->camera;
+    }
+
+    CommandBuffer * Window::get_command_buffer()
+    {
+        return &_d->command_buffer;
     }
 
     Window WindowBuilder::build() const
