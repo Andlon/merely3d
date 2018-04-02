@@ -31,9 +31,16 @@ const std::string DEFAULT_FSHADER=
 "}                                                       \n"
 ;
 
-Eigen::Matrix4f projection_matrix(float fov, float aspect_ratio, float near_plane_dist)
+/// Computes the "infinite" projection matrix with the given
+/// vertical field of view `fovy`, aspect ratio and the distance to
+/// the near plane.
+///
+/// The projection matrix maps points from the view space in which
+/// negative z is "in front of" the camera. In other words,
+/// positive z values are not shown.
+Eigen::Matrix4f projection_matrix(float fovy, float aspect_ratio, float near_plane_dist)
 {
-    assert(fov > 0.0);
+    assert(fovy > 0.0);
     assert(aspect_ratio > 0.0);
     assert(near_plane_dist > 0.0);
     const auto n = near_plane_dist;
@@ -48,10 +55,10 @@ Eigen::Matrix4f projection_matrix(float fov, float aspect_ratio, float near_plan
     // so the end effect is a much more precise result. This would require setting the
     // clip plane in OpenGL through glClipPlane, however.
     Eigen::Matrix4f p;
-    p << (fov / aspect_ratio), 0.0,  0.0,      0.0,
-                          0.0, fov,  0.0,      0.0,
-                          0.0, 0.0, -1.0, -2.0 * n,
-                          0.0, 0.0, -1.0,      0.0;
+    p << (fovy / aspect_ratio),  0.0,  0.0,      0.0,
+                           0.0, fovy,  0.0,      0.0,
+                           0.0,  0.0, -1.0, -2.0 * n,
+                           0.0,  0.0, -1.0,      0.0;
     return p;
 }
 
