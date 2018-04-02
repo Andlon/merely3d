@@ -21,7 +21,8 @@ set(LIB_HEADERS
     include/merely3d/window.hpp
     include/merely3d/frame.hpp
     include/merely3d/types.hpp
-    include/merely3d/material.hpp)
+    include/merely3d/material.hpp
+    include/merely3d/camera.hpp)
 set(LIB_FILES
     src/main.cpp
     src/window.cpp

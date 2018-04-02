@@ -3,6 +3,7 @@
 #include <memory>
 
 #include <merely3d/frame.hpp>
+#include <merely3d/camera.hpp>
 
 namespace merely3d
 {
@@ -23,6 +24,9 @@ namespace merely3d
             std::forward<RenderFunc>(render_func)(frame);
             render_frame_impl(frame);
         }
+
+        Camera & camera();
+        const Camera & camera() const;
 
     private:
         friend class WindowBuilder;

@@ -14,6 +14,8 @@ using merely3d::Orientation;
 using merely3d::Vector3;
 using merely3d::Vector2;
 
+using Eigen::Vector3f;
+
 int main(void)
 {
     /* Initialize the library */
@@ -27,13 +29,15 @@ int main(void)
                     .title("Hello merely3d!")
                     .build();
 
+        window.camera().look_in(Vector3f(-1.0, 0.0, 0.0), Vector3f(0.0, 1.0, 0.0));
+
         while (!window.should_close())
         {
             window.render_frame([] (Frame & frame)
             {
                 Orientation orientation = Orientation::Identity();
-                orientation = Eigen::AngleAxisf(0.78, Eigen::Vector3f(1.0, 0.0, 0.0));
-                frame.draw_rectangle(Vector2(0.5, 0.5), Position(0.0, 0.0, -1.0), orientation);
+                // orientation = Eigen::AngleAxisf(0.78, Eigen::Vector3f(1.0, 0.0, 0.0));
+                frame.draw_rectangle(Vector2(0.5, 0.5), Position(1.0, 0.0, 0.0), orientation);
             });
         }
     }

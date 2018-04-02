@@ -112,6 +112,8 @@ namespace merely3d
         GLuint rectangle_vbo;
         GLuint rectangle_vao;
         GLuint rectangle_ebo;
+
+        Camera camera;
     };
 
     static void check_and_update_viewport_size(GLFWwindow * window, int & viewport_width, int & viewport_height)
@@ -192,9 +194,11 @@ namespace merely3d
 
         glBindVertexArray(_d->rectangle_vao);
 
+        const Eigen::Affine3f view = camera().transform().inverse();
+
         for (const auto & rectangle : frame._rectangles)
         {
-            const Eigen::Affine3f & modelview = rectangle.transform;
+            const Eigen::Affine3f modelview = view * rectangle.transform;
             program.set_mat4_uniform(projection_loc, projection.data());
             program.set_mat4_uniform(modelview_loc, modelview.data());
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
@@ -210,6 +214,16 @@ namespace merely3d
     bool Window::should_close() const
     {
         return glfwWindowShouldClose(_d->glfw_window.get());
+    }
+
+    Camera & Window::camera()
+    {
+        return _d->camera;
+    }
+
+    const Camera & Window::camera() const
+    {
+        return _d->camera;
     }
 
     Window WindowBuilder::build() const
