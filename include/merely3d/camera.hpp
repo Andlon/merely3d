@@ -1,7 +1,5 @@
 #include <Eigen/Dense>
 
-#include <iostream>
-
 namespace merely3d
 {
     class Camera
@@ -93,8 +91,6 @@ namespace merely3d
         // is defined below
         Matrix3f rotation;
         rotation << r, u, -d;
-
-        std::cout << std::endl << rotation << std::endl;
 
         _transform.linear() = rotation;
     }
