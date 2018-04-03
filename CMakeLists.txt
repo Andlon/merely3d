@@ -23,7 +23,8 @@ set(LIB_HEADERS
     include/merely3d/types.hpp
     include/merely3d/material.hpp
     include/merely3d/camera.hpp
-    include/merely3d/primitives.hpp)
+    include/merely3d/primitives.hpp
+    include/merely3d/key_event.hpp)
 set(LIB_FILES
     src/main.cpp
     src/window.cpp
@@ -32,7 +33,8 @@ set(LIB_FILES
     src/shader.cpp
     src/command_buffer.hpp
     src/renderer.hpp
-    src/renderer.cpp)
+    src/renderer.cpp
+    src/key_convert.hpp)
 
 add_executable(merely ${LIB_FILES} ${LIB_HEADERS})
 

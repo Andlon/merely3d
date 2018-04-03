@@ -4,10 +4,12 @@
 #include <GLFW/glfw3.h>
 
 #include <iostream>
+#include <vector>
 
 #include "shader.hpp"
 #include "command_buffer.hpp"
 #include "renderer.hpp"
+#include "key_convert.hpp"
 
 typedef void(*GlfwWindowDestroyFunc)(GLFWwindow *);
 typedef std::unique_ptr<GLFWwindow, GlfwWindowDestroyFunc> GlfwWindowPtr;
@@ -30,6 +32,8 @@ namespace merely3d
 
         CommandBuffer command_buffer;
         Renderer renderer;
+
+        std::vector<std::shared_ptr<KeyListener>> key_listeners;
     };
 
     static void check_and_update_viewport_size(GLFWwindow * window, int & viewport_width, int & viewport_height)
@@ -46,6 +50,35 @@ namespace merely3d
         }
     }
 
+    void dispatch_key_event(Window * window,
+                            Key key,
+                            KeyAction action,
+                            int scancode,
+                            int modifiers)
+    {
+        for (auto & listener : window->_d->key_listeners)
+        {
+            const auto stop_propagate =
+                listener->key_press(*window, key, action, scancode, modifiers);
+            if (stop_propagate)
+            {
+                break;
+            }
+        }
+    }
+
+    static void key_callback(GLFWwindow* glfw_window,
+                             int glfw_key,
+                             int scancode,
+                             int glfw_action,
+                             int mods)
+    {
+        auto window_ptr = static_cast<Window *>(glfwGetWindowUserPointer(glfw_window));
+        const auto key = key_from_glfw(glfw_key);
+        const auto action = action_from_glfw(glfw_action);
+        dispatch_key_event(window_ptr, key, action, scancode, mods);
+    }
+
     Window::Window(Window && other)
         : _d(nullptr)
     {
@@ -53,6 +86,7 @@ namespace merely3d
         {
             _d = other._d;
             other._d = nullptr;
+            glfwSetWindowUserPointer(_d->glfw_window.get(), this);
         }
     }
 
@@ -71,6 +105,7 @@ namespace merely3d
     {
         assert(data);
         _d = data;
+        glfwSetWindowUserPointer(data->glfw_window.get(), this);
     }
 
     void Window::render_frame_impl(Frame & frame)
@@ -106,6 +141,11 @@ namespace merely3d
         return _d->camera;
     }
 
+    void Window::add_key_listener(std::shared_ptr<KeyListener> listener)
+    {
+        _d->key_listeners.push_back(std::move(listener));
+    }
+
     CommandBuffer * Window::get_command_buffer()
     {
         return &_d->command_buffer;
@@ -136,6 +176,8 @@ namespace merely3d
             // TODO: Better error message
             throw std::runtime_error("Failed to initialize GLAD");
         }
+
+        glfwSetKeyCallback(glfw_window, key_callback);
 
         auto renderer = Renderer::build();
         auto window_ptr = GlfwWindowPtr(glfw_window, glfwDestroyWindow);
