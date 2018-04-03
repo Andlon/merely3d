@@ -22,6 +22,11 @@ namespace merely3d
                             const Orientation & orientation = Orientation::Identity(),
                             const Material & material = Material());
 
+        void draw_box(const Box & shape,
+                      const Position & position = Position::Zero(),
+                      const Orientation & orientation = Orientation::Identity(),
+                      const Material & material = Material());
+
     private:
         Frame(CommandBuffer * buffer) : _buffer(buffer) {}
         ~Frame() {}

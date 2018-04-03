@@ -14,4 +14,14 @@ namespace merely3d
 
         Eigen::Vector2f extents;
     };
+
+    struct Box
+    {
+        Box() : extents(Eigen::Vector3f::Zero()) {}
+        Box(const Eigen::Vector3f & extents) : extents(extents) {}
+        Box(float x_extent, float y_extent, float z_extent)
+            : extents(Eigen::Vector3f(x_extent, y_extent, z_extent)) {}
+
+        Eigen::Vector3f extents;
+    };
 }

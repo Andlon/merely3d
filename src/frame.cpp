@@ -15,4 +15,12 @@ namespace merely3d
     {
         _buffer->push_rectangle(shape, position, orientation, material);
     }
+
+    void Frame::draw_box(const Box & shape,
+                         const Position & position,
+                         const Orientation & orientation,
+                         const Material & material)
+    {
+        _buffer->push_box(shape, position, orientation, material);
+    }
 }

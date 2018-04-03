@@ -79,6 +79,54 @@ namespace
              2, 3, 0
         };
     }
+
+    std::vector<float> unit_cube_vertices()
+    {
+        const float s = 0.5;
+
+        return {
+            // Negative y
+            -s, -s, s,  // 0, top-south-west
+            -s, -s, -0.5, // 1, bottom-south-west
+            s, -s, -s,  // 2, bottom-south-east
+            s, -s, s,   // 3, top-south-east
+
+            // Positive y
+            -s, s, s,   // 4, top-north-west
+            -s, s, -s,  // 5, bottom-north-west
+            s, s, -s,   // 6, bottom-north-east
+            s, s, s,    // 7, top-north-east
+        };
+    }
+
+    std::vector<unsigned int> unit_cube_indices()
+    {
+        return {
+            // Southern face
+            0, 1, 2,
+            2, 3, 0,
+
+            // Eastern face
+            3, 2, 7,
+            2, 6, 7,
+
+            // Northern face
+            5, 4, 7,
+            7, 6, 5,
+
+            // Western face
+            1, 0, 4,
+            4, 5, 1,
+
+            // Bottom face
+            6, 2, 1,
+            6, 1, 5,
+
+            // Top face
+            0, 3, 7,
+            7, 4, 0
+        };
+    }
 }
 
 namespace merely3d
@@ -102,6 +150,7 @@ namespace merely3d
         const auto rect_verts = unit_rectangle_vertices();
         const auto rect_idx = unit_rectangle_indices();
 
+        // TODO: Encapsulate all this stuff in a StaticMesh type or similar
         GLuint rect_vao, rect_vbo, rect_ebo;
         glGenVertexArrays(1, &rect_vao);
         glBindVertexArray(rect_vao);
@@ -114,10 +163,29 @@ namespace merely3d
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
         glEnableVertexAttribArray(0);
 
+        // Construct VBO and VAO for the unit cube
+        const auto cube_verts = unit_cube_vertices();
+        const auto cube_idx = unit_cube_indices();
+
+        GLuint cube_vao, cube_vbo, cube_ebo;
+        glGenVertexArrays(1, &cube_vao);
+        glBindVertexArray(cube_vao);
+        glGenBuffers(1, &cube_vbo);
+        glGenBuffers(1, &cube_ebo);
+        glBindBuffer(GL_ARRAY_BUFFER, cube_vbo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_ebo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * cube_verts.size(), cube_verts.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * cube_idx.size(), cube_idx.data(), GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+        glEnableVertexAttribArray(0);
+
         Renderer renderer(std::move(default_program));
         renderer.rectangle_ebo = rect_ebo;
         renderer.rectangle_vbo = rect_vbo;
         renderer.rectangle_vao = rect_vao;
+        renderer.cube_ebo = cube_ebo;
+        renderer.cube_vbo = cube_vbo;
+        renderer.cube_vao = cube_vao;
         return std::move(renderer);
     }
 
@@ -127,8 +195,9 @@ namespace merely3d
                           int viewport_height)
     {
         // TODO: Make clear color configurable
+        glEnable(GL_DEPTH_TEST);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         default_program.use();
 
@@ -160,6 +229,19 @@ namespace merely3d
             default_program.set_mat4_uniform(projection_loc, projection.data());
             default_program.set_mat4_uniform(modelview_loc, modelview.data());
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        }
+
+        glBindVertexArray(cube_vao);
+
+        for (const auto & box : buffer.boxes())
+        {
+            const auto & extents = box.shape.extents;
+            const auto scaling = Eigen::DiagonalMatrix<float, 3>(extents);
+            const Eigen::Affine3f transform = Eigen::Translation3f(box.position) * box.orientation * scaling;
+            const Eigen::Affine3f modelview = view * transform;
+            default_program.set_mat4_uniform(projection_loc, projection.data());
+            default_program.set_mat4_uniform(modelview_loc, modelview.data());
+            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);
         }
 
     }
