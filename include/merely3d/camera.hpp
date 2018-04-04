@@ -12,6 +12,7 @@ namespace merely3d
         Eigen::Vector3f position() const;
         Eigen::Vector3f direction() const;
         Eigen::Vector3f up() const;
+        Eigen::Vector3f right() const;
 
         Eigen::Affine3f transform() const;
 
@@ -51,6 +52,11 @@ namespace merely3d
     {
         // See note for direction()
         return _transform.linear() * Eigen::Vector3f(0.0, 1.0, 0.0);
+    }
+
+    inline Eigen::Vector3f Camera::right() const
+    {
+        return _transform.linear() * Eigen::Vector3f(1.0, 0.0, 0.0);
     }
 
     inline Eigen::Affine3f Camera::transform() const

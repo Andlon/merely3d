@@ -17,6 +17,10 @@ namespace merely3d
         {
             // TODO: More keys
             case GLFW_KEY_A: return Key::A;
+            case GLFW_KEY_W: return Key::W;
+            case GLFW_KEY_S: return Key::S;
+            case GLFW_KEY_D: return Key::D;
+            case GLFW_KEY_SPACE: return Key::Space;
             default: return Key::Unknown;
         }
     }

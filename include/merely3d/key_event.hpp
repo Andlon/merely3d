@@ -34,6 +34,7 @@ namespace merely3d
         X,
         Y,
         Z,
+        Space,
         Unknown
     };
 

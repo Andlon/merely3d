@@ -19,7 +19,7 @@ using merely3d::Vector2;
 
 using Eigen::Vector3f;
 
-struct TestKeyListener : public merely3d::KeyListener
+struct CameraKeyController : public merely3d::KeyListener
 {
     virtual bool key_press(Window & window,
                            Key key,
@@ -27,13 +27,26 @@ struct TestKeyListener : public merely3d::KeyListener
                            int scancode,
                            int modifiers) override
     {
-        if (key == Key::A)
+        const auto STRAFE_STEP_LENGTH = 0.5;
+        auto & camera = window.camera();
+
+        Eigen::Vector3f strafe_direction = Eigen::Vector3f::Zero();
+
+        if (action == KeyAction::Press || action == KeyAction::Repeat)
         {
-            std::cout << "Got A!" << std::endl;
-        }
-        else
-        {
-            std::cout << "Got something else." << std::endl;
+            switch (key)
+            {
+                case Key::W: strafe_direction += camera.direction(); break;
+                case Key::S: strafe_direction -= camera.direction(); break;
+                case Key::A: strafe_direction -= camera.right(); break;
+                case Key::D: strafe_direction += camera.right(); break;
+                case Key::Space: strafe_direction += camera.up(); break;
+                case Key::C: strafe_direction -= camera.up(); break;
+            }
+
+            strafe_direction.normalize();
+
+            camera.set_position(camera.position() + STRAFE_STEP_LENGTH * strafe_direction);
         }
     }
 };
@@ -54,7 +67,7 @@ int main(void)
         window.camera().look_in(Vector3f(1.0, 0.0, -1), Vector3f(0.0, 0.0, 1.0));
         window.camera().set_position(Vector3f(-1.0, 0.0, 3.0));
 
-        window.add_key_listener(std::shared_ptr<KeyListener>(new TestKeyListener()));
+        window.add_key_listener(std::shared_ptr<KeyListener>(new CameraKeyController()));
 
         while (!window.should_close())
         {
