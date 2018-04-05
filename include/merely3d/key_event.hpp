@@ -35,6 +35,10 @@ namespace merely3d
         Y,
         Z,
         Space,
+        Left,
+        Right,
+        Up,
+        Down,
         Unknown
     };
 

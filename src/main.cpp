@@ -5,6 +5,8 @@
 
 #include <merely3d/window.hpp>
 
+#include <Eigen/Geometry>
+
 using merely3d::Window;
 using merely3d::WindowBuilder;
 using merely3d::Frame;
@@ -27,10 +29,18 @@ struct CameraKeyController : public merely3d::KeyListener
                            int scancode,
                            int modifiers) override
     {
+        using Eigen::AngleAxisf;
+
         const auto STRAFE_STEP_LENGTH = 0.5;
+        const auto ANGLE_STEP = 0.05;
         auto & camera = window.camera();
 
         Eigen::Vector3f strafe_direction = Eigen::Vector3f::Zero();
+        const auto x = Eigen::Vector3f(1.0, 0.0, 0.0);
+        const auto y = Eigen::Vector3f(0.0, 1.0, 0.0);
+        const auto z = Eigen::Vector3f(0.0, 0.0, 1.0);
+
+        Eigen::Vector3f rotation_axis = Eigen::Vector3f::Zero();
 
         if (action == KeyAction::Press || action == KeyAction::Repeat)
         {
@@ -42,10 +52,19 @@ struct CameraKeyController : public merely3d::KeyListener
                 case Key::D: strafe_direction += camera.right(); break;
                 case Key::Space: strafe_direction += camera.up(); break;
                 case Key::C: strafe_direction -= camera.up(); break;
+                case Key::Left: rotation_axis += z; break;
+                case Key::Right: rotation_axis -= z; break;
+                case Key::Up: rotation_axis += camera.right(); break;
+                case Key::Down: rotation_axis -= camera.right(); break;
             }
 
             strafe_direction.normalize();
+            rotation_axis.normalize();
 
+            const AngleAxisf rotation = AngleAxisf(ANGLE_STEP, rotation_axis);
+            const Eigen::Quaternionf new_orientation = rotation * camera.orientation();
+
+            camera.set_orientation(new_orientation);
             camera.set_position(camera.position() + STRAFE_STEP_LENGTH * strafe_direction);
         }
     }

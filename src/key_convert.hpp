@@ -21,6 +21,10 @@ namespace merely3d
             case GLFW_KEY_S: return Key::S;
             case GLFW_KEY_D: return Key::D;
             case GLFW_KEY_SPACE: return Key::Space;
+            case GLFW_KEY_LEFT: return Key::Left;
+            case GLFW_KEY_RIGHT: return Key::Right;
+            case GLFW_KEY_DOWN: return Key::Down;
+            case GLFW_KEY_UP: return Key::Up;
             default: return Key::Unknown;
         }
     }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Eigen/Dense>
+#include <Eigen/Geometry>
 
 namespace merely3d
 {
@@ -14,65 +15,69 @@ namespace merely3d
         Eigen::Vector3f up() const;
         Eigen::Vector3f right() const;
 
+        Eigen::Quaternionf orientation() const;
         Eigen::Affine3f transform() const;
 
         void set_position(const Eigen::Vector3f & position);
 
-        template <typename DerivedRotation>
-        void set_orientation(const Eigen::RotationBase<DerivedRotation, 3> & orientation);
+        template <typename IntoRotation>
+        void set_orientation(const IntoRotation & orientation);
 
         void look_in(const Eigen::Vector3f & direction,
                      const Eigen::Vector3f & up);
 
     private:
-        Eigen::Affine3f _transform;
+        Eigen::Vector3f _position;
+        Eigen::Quaternionf _orientation;
+        // Eigen::Affine3f _transform;
     };
 
     inline Camera::Camera()
-        : _transform(Eigen::Affine3f::Identity())
+        : _position(Eigen::Vector3f::Zero()),
+          _orientation(Eigen::Quaternionf::Identity())
     {
 
     }
 
     inline Eigen::Vector3f Camera::position() const
     {
-        return _transform.translation();
+        return _position;
     }
 
     inline Eigen::Vector3f Camera::direction() const
     {
-        // Note: we assume that the linear part of the transform is a pure
-        // rotation, which should be the case since the Camera cannot be
-        // constructed from anything which would include a scaling or
-        // reflection
-        return _transform.linear() * Eigen::Vector3f(0.0, 0.0, -1.0);
+        return _orientation * Eigen::Vector3f(0.0, 0.0, -1.0);
     }
 
     inline Eigen::Vector3f Camera::up() const
     {
-        // See note for direction()
-        return _transform.linear() * Eigen::Vector3f(0.0, 1.0, 0.0);
+        return _orientation * Eigen::Vector3f(0.0, 1.0, 0.0);
     }
 
     inline Eigen::Vector3f Camera::right() const
     {
-        return _transform.linear() * Eigen::Vector3f(1.0, 0.0, 0.0);
+        return _orientation * Eigen::Vector3f(1.0, 0.0, 0.0);
+    }
+
+    inline Eigen::Quaternionf Camera::orientation() const
+    {
+        return _orientation;
     }
 
     inline Eigen::Affine3f Camera::transform() const
     {
-        return _transform;
+        return Eigen::Translation3f(_position) * _orientation;
     }
 
     inline void Camera::set_position(const Eigen::Vector3f & position)
     {
-        _transform.translation() = position;
+        _position = position;
     }
 
-    template <typename DerivedRotation>
-    inline void Camera::set_orientation(const Eigen::RotationBase<DerivedRotation, 3> & orientation)
+    template <typename IntoRotation>
+    inline void Camera::set_orientation(const IntoRotation & orientation)
     {
-        _transform.linear() = orientation;
+        _orientation = orientation;
     }
 
     inline void Camera::look_in(const Eigen::Vector3f & direction,
@@ -100,6 +105,6 @@ namespace merely3d
         Matrix3f rotation;
         rotation << r, u, -d;
 
-        _transform.linear() = rotation;
+        _orientation = rotation;
     }
 }

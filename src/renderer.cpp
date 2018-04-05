@@ -219,6 +219,8 @@ namespace merely3d
 
         glBindVertexArray(rectangle_vao);
 
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
         for (const auto & rectangle : buffer.rectangles())
         {
             const auto & extents = rectangle.shape.extents;
