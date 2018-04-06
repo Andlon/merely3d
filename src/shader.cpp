@@ -80,4 +80,9 @@ namespace merely3d
     {
         glUniformMatrix4fv(location, 1, false, value);
     }
+
+    void ShaderProgram::set_vec3_uniform(GLint location, const float * value)
+    {
+        glUniform3fv(location, 1, value);
+    }
 }

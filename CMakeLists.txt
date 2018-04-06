@@ -24,7 +24,8 @@ set(LIB_HEADERS
     include/merely3d/material.hpp
     include/merely3d/camera.hpp
     include/merely3d/primitives.hpp
-    include/merely3d/key_event.hpp)
+    include/merely3d/key_event.hpp
+    include/merely3d/color.hpp)
 set(LIB_FILES
     src/main.cpp
     src/window.cpp

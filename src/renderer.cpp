@@ -18,11 +18,13 @@ namespace
 
     const std::string DEFAULT_FSHADER=
     "#version 330 core                                       \n"
+    "                                                        \n"
+    "uniform vec3 color;                                     \n"
     "out vec4 FragColor;                                     \n"
     "                                                        \n"
     "void main()                                             \n"
     "{                                                       \n"
-    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);            \n"
+    "   FragColor = vec4(color, 1.0f);                       \n"
     "}                                                       \n"
     ;
 
@@ -205,6 +207,7 @@ namespace merely3d
         // program is created
         const auto projection_loc = default_program.get_uniform_loc("projection");
         const auto modelview_loc = default_program.get_uniform_loc("modelview");
+        const auto color_loc = default_program.get_uniform_loc("color");
 
         // TODO: Move aspect ratio computation to separate function
         const auto width = static_cast<float>(viewport_width);
@@ -219,8 +222,6 @@ namespace merely3d
 
         glBindVertexArray(rectangle_vao);
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
         for (const auto & rectangle : buffer.rectangles())
         {
             const auto & extents = rectangle.shape.extents;
@@ -228,8 +229,11 @@ namespace merely3d
             const Eigen::Affine3f transform = Eigen::Translation3f(rectangle.position) *  rectangle.orientation * scaling;
 
             const Eigen::Affine3f modelview = view * transform;
+            const auto & color = rectangle.material.color;
+            const float color_array[] = { color.r(), color.g(), color.b() };
             default_program.set_mat4_uniform(projection_loc, projection.data());
             default_program.set_mat4_uniform(modelview_loc, modelview.data());
+            default_program.set_vec3_uniform(color_loc, color_array);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
         }
 
@@ -241,8 +245,11 @@ namespace merely3d
             const auto scaling = Eigen::DiagonalMatrix<float, 3>(extents);
             const Eigen::Affine3f transform = Eigen::Translation3f(box.position) * box.orientation * scaling;
             const Eigen::Affine3f modelview = view * transform;
+            const auto & color = box.material.color;
+            const float color_array[] = { color.r(), color.g(), color.b() };
             default_program.set_mat4_uniform(projection_loc, projection.data());
             default_program.set_mat4_uniform(modelview_loc, modelview.data());
+            default_program.set_vec3_uniform(color_loc, color_array);
             glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);
         }
 

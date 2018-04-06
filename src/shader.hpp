@@ -52,6 +52,7 @@ namespace merely3d
         GLint get_uniform_loc(const std::string & name) const;
 
         void set_mat4_uniform(GLint location, const float * value);
+        void set_vec3_uniform(GLint location, const float * value);
 
     private:
         ShaderProgram() : _id(0) {}

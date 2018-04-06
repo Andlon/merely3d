@@ -13,6 +13,8 @@ using merely3d::Frame;
 using merely3d::Key;
 using merely3d::KeyAction;
 using merely3d::KeyListener;
+using merely3d::Material;
+using merely3d::Color;
 
 using merely3d::Position;
 using merely3d::Orientation;
@@ -92,9 +94,13 @@ int main(void)
         {
             window.render_frame([] (Frame & frame)
             {
+                const auto rect_material = Material().with_color(Color(0.5, 0.3, 0.3));
                 Orientation orientation = Orientation::Identity();
                 orientation = Eigen::AngleAxisf(0.78, Eigen::Vector3f(1.0, 0.0, 0.0));
-                frame.draw_rectangle(Vector2(0.5, 0.5), Position(1.0, 0.0, 0.05), orientation);
+                frame.draw_rectangle(Vector2(0.5, 0.5),
+                                     Position(1.0, 0.0, 0.05),
+                                     orientation,
+                                     rect_material);
                 frame.draw_box(Vector3(1.0, 1.0, 1.0), Position(4.0, 0.0, 0.1));
             });
         }
