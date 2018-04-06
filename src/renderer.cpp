@@ -214,7 +214,7 @@ namespace merely3d
         const auto aspect_ratio = viewport_width > 0.0 && viewport_height > 0.0
                                     ? viewport_width / viewport_height
                                     : 1.0;
-        const auto projection = projection_matrix(0.785398, aspect_ratio, 0.1);
+        const auto projection = projection_matrix(1.57, aspect_ratio, 0.1);
         const Eigen::Affine3f view = camera.transform().inverse();
 
         glBindVertexArray(rectangle_vao);
