@@ -43,17 +43,17 @@ namespace merely3d
     };
 
     // TODO: This is not just for keys, also for mouse buttons, so rename to reflect!
-    enum class KeyAction
+    enum class Action
     {
         Press,
         Repeat,
         Release
     };
 
-    class KeyListener
+    class EventHandler
     {
     public:
-        virtual ~KeyListener() {};
+        virtual ~EventHandler() {};
 
         /// This function is called when the listener is notified about
         /// a key event. Returning true stops propagation of the event
@@ -62,7 +62,7 @@ namespace merely3d
         // TODO: Introduce enum (class? Does not work well for bitflags, or?) for modifiers
         virtual bool key_press(Window & window,
                                Key key,
-                               KeyAction action,
+                               Action action,
                                int scancode,
                                int modifiers) = 0;
     };

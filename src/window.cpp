@@ -9,7 +9,7 @@
 #include "shader.hpp"
 #include "command_buffer.hpp"
 #include "renderer.hpp"
-#include "key_convert.hpp"
+#include "event_convert.hpp"
 
 typedef void(*GlfwWindowDestroyFunc)(GLFWwindow *);
 typedef std::unique_ptr<GLFWwindow, GlfwWindowDestroyFunc> GlfwWindowPtr;
@@ -33,7 +33,7 @@ namespace merely3d
         CommandBuffer command_buffer;
         Renderer renderer;
 
-        std::vector<std::shared_ptr<KeyListener>> key_listeners;
+        std::vector<std::shared_ptr<EventHandler>> event_handlers;
     };
 
     static void check_and_update_viewport_size(GLFWwindow * window, int & viewport_width, int & viewport_height)
@@ -52,11 +52,11 @@ namespace merely3d
 
     void dispatch_key_event(Window * window,
                             Key key,
-                            KeyAction action,
+                            Action action,
                             int scancode,
                             int modifiers)
     {
-        for (auto & listener : window->_d->key_listeners)
+        for (auto & listener : window->_d->event_handlers)
         {
             const auto stop_propagate =
                 listener->key_press(*window, key, action, scancode, modifiers);
@@ -141,9 +141,9 @@ namespace merely3d
         return _d->camera;
     }
 
-    void Window::add_key_listener(std::shared_ptr<KeyListener> listener)
+    void Window::add_event_handler(std::shared_ptr<EventHandler> handler)
     {
-        _d->key_listeners.push_back(std::move(listener));
+        _d->event_handlers.push_back(std::move(handler));
     }
 
     CommandBuffer * Window::get_command_buffer()

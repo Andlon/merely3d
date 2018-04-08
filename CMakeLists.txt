@@ -30,7 +30,7 @@ set(LIB_HEADERS
     include/merely3d/material.hpp
     include/merely3d/camera.hpp
     include/merely3d/primitives.hpp
-    include/merely3d/key_event.hpp
+    include/merely3d/events.hpp
     include/merely3d/color.hpp)
 
 set(LIB_FILES
@@ -42,7 +42,7 @@ set(LIB_FILES
     src/command_buffer.hpp
     src/renderer.hpp
     src/renderer.cpp
-    src/key_convert.hpp)
+    src/event_convert.hpp)
 
 add_executable(merely ${LIB_FILES} ${LIB_HEADERS})
 

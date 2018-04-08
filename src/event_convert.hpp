@@ -1,6 +1,6 @@
 #pragma once
 
-#include <merely3d/key_event.hpp>
+#include <merely3d/events.hpp>
 #include <GLFW/glfw3.h>
 
 #include <string>
@@ -30,13 +30,13 @@ namespace merely3d
         }
     }
 
-    inline KeyAction action_from_glfw(int glfw_action)
+    inline Action action_from_glfw(int glfw_action)
     {
         switch (glfw_action)
         {
-            case GLFW_PRESS: return KeyAction::Press;
-            case GLFW_RELEASE: return KeyAction::Release;
-            case GLFW_REPEAT: return KeyAction::Repeat;
+            case GLFW_PRESS: return Action::Press;
+            case GLFW_RELEASE: return Action::Release;
+            case GLFW_REPEAT: return Action::Repeat;
             default:
                 std::stringstream error;
                 error << "Internal error: unhandled GLFW key action "

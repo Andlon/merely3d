@@ -4,7 +4,7 @@
 
 #include <merely3d/frame.hpp>
 #include <merely3d/camera.hpp>
-#include <merely3d/key_event.hpp>
+#include <merely3d/events.hpp>
 
 namespace merely3d
 {
@@ -31,11 +31,11 @@ namespace merely3d
         Camera & camera();
         const Camera & camera() const;
 
-        void add_key_listener(std::shared_ptr<KeyListener> listener);
+        void add_event_handler(std::shared_ptr<EventHandler> handler);
 
     private:
         friend class WindowBuilder;
-        friend void dispatch_key_event(Window *, Key, KeyAction, int, int);
+        friend void dispatch_key_event(Window *, Key, Action, int, int);
         class WindowData;
 
         Window(WindowData * data);

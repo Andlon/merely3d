@@ -11,8 +11,8 @@ using merely3d::Window;
 using merely3d::WindowBuilder;
 using merely3d::Frame;
 using merely3d::Key;
-using merely3d::KeyAction;
-using merely3d::KeyListener;
+using merely3d::Action;
+using merely3d::EventHandler;
 using merely3d::Material;
 using merely3d::Color;
 
@@ -23,11 +23,11 @@ using merely3d::Vector2;
 
 using Eigen::Vector3f;
 
-struct CameraKeyController : public merely3d::KeyListener
+struct CameraKeyController : public merely3d::EventHandler
 {
     virtual bool key_press(Window & window,
                            Key key,
-                           KeyAction action,
+                           Action action,
                            int scancode,
                            int modifiers) override
     {
@@ -44,7 +44,7 @@ struct CameraKeyController : public merely3d::KeyListener
 
         Eigen::Vector3f rotation_axis = Eigen::Vector3f::Zero();
 
-        if (action == KeyAction::Press || action == KeyAction::Repeat)
+        if (action == Action::Press || action == Action::Repeat)
         {
             switch (key)
             {
@@ -88,7 +88,7 @@ int main(void)
         window.camera().look_in(Vector3f(1.0, 0.0, -1), Vector3f(0.0, 0.0, 1.0));
         window.camera().set_position(Vector3f(-1.0, 0.0, 3.0));
 
-        window.add_key_listener(std::shared_ptr<KeyListener>(new CameraKeyController()));
+        window.add_event_handler(std::shared_ptr<EventHandler>(new CameraKeyController()));
 
         while (!window.should_close())
         {
