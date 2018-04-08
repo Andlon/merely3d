@@ -16,6 +16,7 @@ out vec4 FragColor;
 
 void main()
 {
+    // TODO: Make ambient/specular etc. configurable
     float ambient_strength = 0.1;
     float specular_strength = 0.5;
 
