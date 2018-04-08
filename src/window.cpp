@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <vector>
+#include <chrono>
 
 #include "shader.hpp"
 #include "command_buffer.hpp"
@@ -22,7 +23,10 @@ namespace merely3d
         WindowData(GlfwWindowPtr ptr, Renderer renderer)
             : glfw_window(std::move(ptr)),
               viewport_size(0, 0),
-              renderer(std::move(renderer))
+              renderer(std::move(renderer)),
+              // Put the first frame time maximally far away in the future,
+              // and special case when determining time since last frame
+              previous_frame_time(std::chrono::steady_clock::time_point::max())
         {}
 
         GlfwWindowPtr glfw_window;
@@ -33,6 +37,7 @@ namespace merely3d
         CommandBuffer command_buffer;
         Renderer renderer;
 
+        std::chrono::steady_clock::time_point previous_frame_time;
         std::vector<std::shared_ptr<EventHandler>> event_handlers;
     };
 
@@ -123,6 +128,9 @@ namespace merely3d
         get_command_buffer()->clear();
 
         glfwSwapBuffers(_d->glfw_window.get());
+
+        end_frame();
+
         glfwPollEvents();
     }
 
@@ -144,6 +152,33 @@ namespace merely3d
     void Window::add_event_handler(std::shared_ptr<EventHandler> handler)
     {
         _d->event_handlers.push_back(std::move(handler));
+    }
+
+    void Window::begin_frame()
+    {
+        double time_since_previous_frame = 0.0;
+        const auto now = std::chrono::steady_clock::now();
+        if (_d->previous_frame_time < now)
+        {
+            const std::chrono::duration<double> duration = now - _d->previous_frame_time;
+            time_since_previous_frame = duration.count();
+        }
+        _d->previous_frame_time = now;
+        for (auto & handler : _d->event_handlers)
+        {
+            handler->before_frame(*this, time_since_previous_frame);
+        }
+    }
+
+    void Window::end_frame()
+    {
+        const auto now = std::chrono::steady_clock::now();
+        const std::chrono::duration<double> duration = now - _d->previous_frame_time;
+
+        for (auto & handler : _d->event_handlers)
+        {
+            handler->after_frame(*this, duration.count());
+        }
     }
 
     CommandBuffer * Window::get_command_buffer()

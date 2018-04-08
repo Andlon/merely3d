@@ -22,6 +22,7 @@ namespace merely3d
         template <typename RenderFunc>
         void render_frame(RenderFunc && render_func)
         {
+            begin_frame();
             auto buffer = get_command_buffer();
             Frame frame(buffer);
             std::forward<RenderFunc>(render_func)(frame);
@@ -40,6 +41,8 @@ namespace merely3d
 
         Window(WindowData * data);
 
+        void begin_frame();
+        void end_frame();
         void render_frame_impl(Frame & frame);
         CommandBuffer * get_command_buffer();
 

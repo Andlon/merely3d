@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <iostream>
+#include <algorithm>
 
 #include <merely3d/window.hpp>
 
@@ -25,6 +26,20 @@ using Eigen::Vector3f;
 
 struct CameraKeyController : public merely3d::EventHandler
 {
+    struct Strafe
+    {
+        bool left;
+        bool right;
+        bool forward;
+        bool backward;
+        bool up;
+        bool down;
+
+        Strafe() : left(false), right(false), forward(false), backward(false), up(false), down(false) {}
+    };
+
+    Strafe _strafe;
+
     virtual bool key_press(Window & window,
                            Key key,
                            Action action,
@@ -44,31 +59,62 @@ struct CameraKeyController : public merely3d::EventHandler
 
         Eigen::Vector3f rotation_axis = Eigen::Vector3f::Zero();
 
+        const auto strafe_enabled = action == Action::Press || action == Action::Repeat;
+
+        switch (key)
+        {
+            case Key::W: _strafe.forward = strafe_enabled; break;
+            case Key::S: _strafe.backward = strafe_enabled; break;
+            case Key::A: _strafe.left = strafe_enabled; break;
+            case Key::D: _strafe.right = strafe_enabled; break;
+            case Key::Space: _strafe.up = strafe_enabled; break;
+            case Key::C: _strafe.down = strafe_enabled; break;
+        }
+
         if (action == Action::Press || action == Action::Repeat)
         {
             switch (key)
             {
-                case Key::W: strafe_direction += camera.direction(); break;
-                case Key::S: strafe_direction -= camera.direction(); break;
-                case Key::A: strafe_direction -= camera.right(); break;
-                case Key::D: strafe_direction += camera.right(); break;
-                case Key::Space: strafe_direction += camera.up(); break;
-                case Key::C: strafe_direction -= camera.up(); break;
                 case Key::Left: rotation_axis += z; break;
                 case Key::Right: rotation_axis -= z; break;
                 case Key::Up: rotation_axis += camera.right(); break;
                 case Key::Down: rotation_axis -= camera.right(); break;
             }
 
-            strafe_direction.normalize();
             rotation_axis.normalize();
 
             const AngleAxisf rotation = AngleAxisf(ANGLE_STEP, rotation_axis);
             const Eigen::Quaternionf new_orientation = rotation * camera.orientation();
 
             camera.set_orientation(new_orientation);
-            camera.set_position(camera.position() + STRAFE_STEP_LENGTH * strafe_direction);
         }
+    }
+
+    virtual void before_frame(Window & window, double time_since_prev)
+    {
+        using Eigen::AngleAxisf;
+
+        const auto STRAFE_VELOCITY = 0.5;
+        const auto dt = std::max(0.25, time_since_prev);
+        auto & camera = window.camera();
+
+        Eigen::Vector3f strafe_direction = Eigen::Vector3f::Zero();
+        const auto x = Eigen::Vector3f(1.0, 0.0, 0.0);
+        const auto y = Eigen::Vector3f(0.0, 1.0, 0.0);
+        const auto z = Eigen::Vector3f(0.0, 0.0, 1.0);
+
+        Eigen::Vector3f rotation_axis = Eigen::Vector3f::Zero();
+
+        if (_strafe.left) strafe_direction -= camera.right();
+        if (_strafe.right) strafe_direction += camera.right();
+        if (_strafe.forward) strafe_direction += camera.direction();
+        if (_strafe.backward) strafe_direction -= camera.direction();
+        if (_strafe.up) strafe_direction += z;
+        if (_strafe.down) strafe_direction -= z;
+
+        strafe_direction.normalize();
+
+        camera.set_position(camera.position() + dt * STRAFE_VELOCITY * strafe_direction);
     }
 };
 
