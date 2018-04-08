@@ -117,8 +117,8 @@ namespace merely3d
 
     Renderer Renderer::build()
     {
-        const auto fragment_shader = Shader::compile(ShaderType::Fragment, shaders::default_fs);
-        const auto vertex_shader = Shader::compile(ShaderType::Vertex, shaders::default_vs);
+        const auto fragment_shader = Shader::compile(ShaderType::Fragment, shaders::default_fragment);
+        const auto vertex_shader = Shader::compile(ShaderType::Vertex, shaders::default_vertex);
         auto default_program = ShaderProgram::create();
         default_program.attach(fragment_shader);
         default_program.attach(vertex_shader);
