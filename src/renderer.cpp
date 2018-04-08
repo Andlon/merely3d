@@ -237,11 +237,13 @@ namespace merely3d
         // TODO: this should be done once, at the time when the
         // program is created
         const auto projection_loc = default_program.get_uniform_loc("projection");
-        const auto modelview_loc = default_program.get_uniform_loc("modelview");
+        const auto model_loc = default_program.get_uniform_loc("model");
+        const auto view_loc = default_program.get_uniform_loc("view");
         const auto object_color_loc = default_program.get_uniform_loc("object_color");
         const auto light_color_loc = default_program.get_uniform_loc("light_color");
         const auto light_dir_loc = default_program.get_uniform_loc("light_dir");
         const auto normal_transform_loc = default_program.get_uniform_loc("normal_transform");
+        const auto view_pos_loc = default_program.get_uniform_loc("view_pos");
 
         // TODO: Move aspect ratio computation to separate function
         const auto width = static_cast<float>(viewport_width);
@@ -269,12 +271,12 @@ namespace merely3d
         {
             const auto & extents = rectangle.shape.extents;
             const auto scaling = Eigen::DiagonalMatrix<float, 3>(extents.x(), extents.y(), 0.0);
-            const Eigen::Affine3f model_transform = Eigen::Translation3f(rectangle.position) *  rectangle.orientation * scaling;
+            const Eigen::Affine3f model = Eigen::Translation3f(rectangle.position) *  rectangle.orientation * scaling;
 
-            const Eigen::Affine3f modelview = view * model_transform;
             const auto obj_color_array = rectangle.material.color.into_array();
             default_program.set_mat4_uniform(projection_loc, projection.data());
-            default_program.set_mat4_uniform(modelview_loc, modelview.data());
+            default_program.set_mat4_uniform(view_loc, view.data());
+            default_program.set_mat4_uniform(model_loc, model.data());
             default_program.set_vec3_uniform(object_color_loc, obj_color_array.data());
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
         }
@@ -289,15 +291,16 @@ namespace merely3d
         {
             const auto & extents = box.shape.extents;
             const auto scaling = Eigen::DiagonalMatrix<float, 3>(extents);
-            const Eigen::Affine3f model_transform = Eigen::Translation3f(box.position) * box.orientation * scaling;
-            const Eigen::Affine3f modelview = view * model_transform;
-            const auto normal_transform = Eigen::Matrix3f(model_transform.linear().inverse().transpose());
+            const Eigen::Affine3f model = Eigen::Translation3f(box.position) * box.orientation * scaling;
+            const auto normal_transform = Eigen::Matrix3f(model.linear().inverse().transpose());
 
             const auto obj_color_array = box.material.color.into_array();
             default_program.set_mat4_uniform(projection_loc, projection.data());
-            default_program.set_mat4_uniform(modelview_loc, modelview.data());
+            default_program.set_mat4_uniform(view_loc, view.data());
+            default_program.set_mat4_uniform(model_loc, model.data());
             default_program.set_mat3_uniform(normal_transform_loc, normal_transform.data());
             default_program.set_vec3_uniform(object_color_loc, obj_color_array.data());
+            default_program.set_vec3_uniform(view_pos_loc, camera.position().data());
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 

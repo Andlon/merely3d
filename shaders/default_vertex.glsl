@@ -2,15 +2,18 @@
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
 
-out vec3 normal;
+out vec3 normal_world;
+out vec3 frag_pos_world;
 
 uniform mat4 projection;
-uniform mat4 modelview;
+uniform mat4 view;
+uniform mat4 model;
 uniform mat3 normal_transform;
 
 void main()
 {
-    vec4 model_pos = vec4(aPos, 1.0);
-    normal = normalize(normal_transform * aNormal);
-    gl_Position = projection * modelview * model_pos;
+    vec4 world_pos = model * vec4(aPos, 1.0);
+    normal_world = normalize(normal_transform * aNormal);
+    frag_pos_world = vec3(world_pos);
+    gl_Position = projection * (view * world_pos);
 }
