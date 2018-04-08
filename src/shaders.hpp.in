@@ -1,0 +1,9 @@
+#pragma once
+
+namespace merely3d
+{
+    namespace shaders
+    {
+        @shaders_cpp_source@
+    }
+}

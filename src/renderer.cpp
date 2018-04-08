@@ -1,33 +1,9 @@
 #include "renderer.hpp"
 
+#include <shaders.hpp>
+
 namespace
 {
-    const std::string DEFAULT_VSHADER =
-    "#version 330 core                                       \n"
-    "layout (location = 0) in vec3 aPos;                     \n"
-    "                                                        \n"
-    "uniform mat4 projection;                                \n"
-    "uniform mat4 modelview;                                 \n"
-    "                                                        \n"
-    "void main()                                             \n"
-    "{                                                       \n"
-    "    vec4 model_pos = vec4(aPos, 1.0);                   \n"
-    "    gl_Position = projection * modelview * model_pos;   \n"
-    "}                                                       \n"
-    ;
-
-    const std::string DEFAULT_FSHADER=
-    "#version 330 core                                       \n"
-    "                                                        \n"
-    "uniform vec3 color;                                     \n"
-    "out vec4 FragColor;                                     \n"
-    "                                                        \n"
-    "void main()                                             \n"
-    "{                                                       \n"
-    "   FragColor = vec4(color, 1.0f);                       \n"
-    "}                                                       \n"
-    ;
-
     /// Computes the "infinite" projection matrix with the given
     /// vertical field of view `fovy`, aspect ratio and the distance to
     /// the near plane.
@@ -141,8 +117,8 @@ namespace merely3d
 
     Renderer Renderer::build()
     {
-        const auto fragment_shader = Shader::compile(ShaderType::Fragment, DEFAULT_FSHADER);
-        const auto vertex_shader = Shader::compile(ShaderType::Vertex, DEFAULT_VSHADER);
+        const auto fragment_shader = Shader::compile(ShaderType::Fragment, shaders::default_fs);
+        const auto vertex_shader = Shader::compile(ShaderType::Vertex, shaders::default_vs);
         auto default_program = ShaderProgram::create();
         default_program.attach(fragment_shader);
         default_program.attach(vertex_shader);

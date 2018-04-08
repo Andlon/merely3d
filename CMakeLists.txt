@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 
+include(${CMAKE_SOURCE_DIR}/cmake/embed_shaders.cmake)
+
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -37,9 +39,14 @@ set(LIB_FILES
     src/renderer.cpp
     src/key_convert.hpp)
 
+set(CONFIGURED_DIR "${CMAKE_BINARY_DIR}/configured")
+set(SHADER_DIR "${CMAKE_SOURCE_DIR}/shaders")
+embed_shaders(${SHADER_DIR} src/shaders.hpp.in ${CONFIGURED_DIR}/shaders.hpp)
+
 add_executable(merely ${LIB_FILES} ${LIB_HEADERS})
 
 target_include_directories(merely SYSTEM PRIVATE ${OPENGL_INCLUDE_DIR})
 target_include_directories(merely SYSTEM PUBLIC include)
+target_include_directories(merely PRIVATE ${CONFIGURED_DIR})
 target_link_libraries(merely glad glfw ${OPENGL_gl_LIBRARY})
 target_link_libraries(merely Eigen3::Eigen)
