@@ -19,6 +19,10 @@ set(GLAD_FILES
 add_library(glad STATIC ${GLAD_FILES})
 target_include_directories(glad SYSTEM PUBLIC extern/glad/include)
 
+set(CONFIGURED_DIR "${CMAKE_BINARY_DIR}/configured")
+set(SHADER_DIR "${CMAKE_SOURCE_DIR}/shaders")
+embed_shaders(${SHADER_DIR} src/shaders.hpp.in ${CONFIGURED_DIR}/shaders.hpp)
+
 set(LIB_HEADERS
     include/merely3d/window.hpp
     include/merely3d/frame.hpp
@@ -28,6 +32,7 @@ set(LIB_HEADERS
     include/merely3d/primitives.hpp
     include/merely3d/key_event.hpp
     include/merely3d/color.hpp)
+
 set(LIB_FILES
     src/main.cpp
     src/window.cpp
@@ -38,10 +43,6 @@ set(LIB_FILES
     src/renderer.hpp
     src/renderer.cpp
     src/key_convert.hpp)
-
-set(CONFIGURED_DIR "${CMAKE_BINARY_DIR}/configured")
-set(SHADER_DIR "${CMAKE_SOURCE_DIR}/shaders")
-embed_shaders(${SHADER_DIR} src/shaders.hpp.in ${CONFIGURED_DIR}/shaders.hpp)
 
 add_executable(merely ${LIB_FILES} ${LIB_HEADERS})
 
