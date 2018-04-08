@@ -35,7 +35,6 @@ namespace merely3d
 
         GLuint cube_vbo;
         GLuint cube_vao;
-        GLuint cube_ebo;
     };
 
 }

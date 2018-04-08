@@ -77,6 +77,61 @@ namespace
         };
     }
 
+    /// Returns the vertices and normals of the unit rectangle,
+    /// defined to lie in the xy-plane (z = 0),
+    /// centered at (0, 0, 0) and with unit length sides.
+    ///
+    /// The data is organized follows:
+    /// { v1_x, v1_y, v1_z, n1_x, n1_y, n1_z, v2_x, ... }
+    /// where v1 is vertex 1, n1 is the normal of vertex 1 and so on.
+    std::vector<float> unit_cube_vertices_and_normals()
+    {
+        // vertices and normals courtesy of learnopengl.com
+        return {
+            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+             0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+             0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+             0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+
+            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+             0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+
+            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+
+             0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+             0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+             0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+             0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+             0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+             0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+
+            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+             0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+             0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+             0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+             0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+        };
+    }
+
     std::vector<unsigned int> unit_cube_indices()
     {
         return {
@@ -125,6 +180,7 @@ namespace merely3d
         default_program.link();
 
         // Construct VBO and VAO for the unit rectangle
+        // TODO: Add normals
         const auto rect_verts = unit_rectangle_vertices();
         const auto rect_idx = unit_rectangle_indices();
 
@@ -142,26 +198,25 @@ namespace merely3d
         glEnableVertexAttribArray(0);
 
         // Construct VBO and VAO for the unit cube
-        const auto cube_verts = unit_cube_vertices();
-        const auto cube_idx = unit_cube_indices();
+        const auto cube_verts = unit_cube_vertices_and_normals();
 
-        GLuint cube_vao, cube_vbo, cube_ebo;
+        GLuint cube_vao, cube_vbo;
         glGenVertexArrays(1, &cube_vao);
         glBindVertexArray(cube_vao);
         glGenBuffers(1, &cube_vbo);
-        glGenBuffers(1, &cube_ebo);
         glBindBuffer(GL_ARRAY_BUFFER, cube_vbo);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_ebo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(float) * cube_verts.size(), cube_verts.data(), GL_STATIC_DRAW);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * cube_idx.size(), cube_idx.data(), GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+        // Position attribute
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
         glEnableVertexAttribArray(0);
+        // normal attribute
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
 
         Renderer renderer(std::move(default_program));
         renderer.rectangle_ebo = rect_ebo;
         renderer.rectangle_vbo = rect_vbo;
         renderer.rectangle_vao = rect_vao;
-        renderer.cube_ebo = cube_ebo;
         renderer.cube_vbo = cube_vbo;
         renderer.cube_vao = cube_vao;
         return std::move(renderer);
@@ -183,7 +238,10 @@ namespace merely3d
         // program is created
         const auto projection_loc = default_program.get_uniform_loc("projection");
         const auto modelview_loc = default_program.get_uniform_loc("modelview");
-        const auto color_loc = default_program.get_uniform_loc("color");
+        const auto object_color_loc = default_program.get_uniform_loc("object_color");
+        const auto light_color_loc = default_program.get_uniform_loc("light_color");
+        const auto light_dir_loc = default_program.get_uniform_loc("light_dir");
+        const auto normal_transform_loc = default_program.get_uniform_loc("normal_transform");
 
         // TODO: Move aspect ratio computation to separate function
         const auto width = static_cast<float>(viewport_width);
@@ -196,37 +254,51 @@ namespace merely3d
         const auto projection = projection_matrix(1.57, aspect_ratio, 0.1);
         const Eigen::Affine3f view = camera.transform().inverse();
 
+        const auto light_color = Color(1.0, 1.0, 1.0);
+        const auto light_color_array = light_color.into_array();
+
+        // TODO: Make lighting configurable rather than hard-coded
+        const Eigen::Vector3f light_dir = Eigen::Vector3f(0.9, 1.2, -0.8).normalized();
+
         glBindVertexArray(rectangle_vao);
+
+        default_program.set_vec3_uniform(light_color_loc, light_color_array.data());
+        default_program.set_vec3_uniform(light_dir_loc, light_dir.data());
 
         for (const auto & rectangle : buffer.rectangles())
         {
             const auto & extents = rectangle.shape.extents;
             const auto scaling = Eigen::DiagonalMatrix<float, 3>(extents.x(), extents.y(), 0.0);
-            const Eigen::Affine3f transform = Eigen::Translation3f(rectangle.position) *  rectangle.orientation * scaling;
+            const Eigen::Affine3f model_transform = Eigen::Translation3f(rectangle.position) *  rectangle.orientation * scaling;
 
-            const Eigen::Affine3f modelview = view * transform;
-            const auto & color = rectangle.material.color;
-            const float color_array[] = { color.r(), color.g(), color.b() };
+            const Eigen::Affine3f modelview = view * model_transform;
+            const auto obj_color_array = rectangle.material.color.into_array();
             default_program.set_mat4_uniform(projection_loc, projection.data());
             default_program.set_mat4_uniform(modelview_loc, modelview.data());
-            default_program.set_vec3_uniform(color_loc, color_array);
+            default_program.set_vec3_uniform(object_color_loc, obj_color_array.data());
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
         }
 
+
         glBindVertexArray(cube_vao);
+
+        default_program.set_vec3_uniform(light_color_loc, light_color_array.data());
+        default_program.set_vec3_uniform(light_dir_loc, light_dir.data());
 
         for (const auto & box : buffer.boxes())
         {
             const auto & extents = box.shape.extents;
             const auto scaling = Eigen::DiagonalMatrix<float, 3>(extents);
-            const Eigen::Affine3f transform = Eigen::Translation3f(box.position) * box.orientation * scaling;
-            const Eigen::Affine3f modelview = view * transform;
-            const auto & color = box.material.color;
-            const float color_array[] = { color.r(), color.g(), color.b() };
+            const Eigen::Affine3f model_transform = Eigen::Translation3f(box.position) * box.orientation * scaling;
+            const Eigen::Affine3f modelview = view * model_transform;
+            const auto normal_transform = Eigen::Matrix3f(model_transform.linear().inverse().transpose());
+
+            const auto obj_color_array = box.material.color.into_array();
             default_program.set_mat4_uniform(projection_loc, projection.data());
             default_program.set_mat4_uniform(modelview_loc, modelview.data());
-            default_program.set_vec3_uniform(color_loc, color_array);
-            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);
+            default_program.set_mat3_uniform(normal_transform_loc, normal_transform.data());
+            default_program.set_vec3_uniform(object_color_loc, obj_color_array.data());
+            glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
     }

@@ -51,6 +51,7 @@ namespace merely3d
         // TODO: This kinda breaks encapsulation, but this class needs a redesign in any case
         GLint get_uniform_loc(const std::string & name) const;
 
+        void set_mat3_uniform(GLint location, const float * value);
         void set_mat4_uniform(GLint location, const float * value);
         void set_vec3_uniform(GLint location, const float * value);
 

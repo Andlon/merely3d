@@ -102,6 +102,12 @@ int main(void)
                                      orientation,
                                      rect_material);
                 frame.draw_box(Vector3(1.0, 1.0, 1.0), Position(4.0, 0.0, 0.1));
+
+                frame.draw_box(Vector3(0.3, 5.0, 3.0), Position(0.0, 0.0, 0.0));
+                frame.draw_box(Vector3(0.2, 1.0, 1.0),
+                               Position(0.0, 0.0, 5.0),
+                               Orientation(Eigen::AngleAxisf(0.5, Vector3(1.0, 1.0, 1.0))),
+                               Material().with_color(Color(1.0, 0.0, 0.0)));
             });
         }
     }

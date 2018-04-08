@@ -76,6 +76,11 @@ namespace merely3d
         return glGetUniformLocation(_id, name.c_str());
     }
 
+    void ShaderProgram::set_mat3_uniform(GLint location, const float * value)
+    {
+        glUniformMatrix3fv(location, 1, false, value);
+    }
+
     void ShaderProgram::set_mat4_uniform(GLint location, const float * value)
     {
         glUniformMatrix4fv(location, 1, false, value);

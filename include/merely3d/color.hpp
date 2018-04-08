@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 namespace merely3d
 {
     class Color final
@@ -11,6 +13,11 @@ namespace merely3d
         float r() const { return _r; }
         float g() const { return _g; }
         float b() const { return _b; }
+
+        std::array<float, 3> into_array() const
+        {
+            return { r(), g(), b() };
+        }
 
     private:
         float _r;
