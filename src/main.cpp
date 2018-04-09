@@ -24,6 +24,70 @@ using merely3d::Vector2;
 
 using Eigen::Vector3f;
 
+struct CameraLookController : public merely3d::EventHandler
+{
+    struct Look
+    {
+        bool up;
+        bool down;
+        bool left;
+        bool right;
+
+        Look() : up(false), down(false), left(false), right(false) {}
+    };
+
+    Look _look;
+
+    virtual bool key_press(Window & window,
+                           Key key,
+                           Action action,
+                           int scancode,
+                           int modifiers) override
+    {
+        const auto look_enabled = action == Action::Press || action == Action::Repeat;
+
+        switch (key)
+        {
+            case Key::Left: _look.left = look_enabled; return true;
+            case Key::Right: _look.right = look_enabled; return true;
+            case Key::Up: _look.up = look_enabled; return true;
+            case Key::Down: _look.down = look_enabled; return true;
+            default: return false;
+        }
+    }
+
+    virtual void before_frame(Window & window, double time_since_prev)
+    {
+        using Eigen::Vector3f;
+        using Eigen::AngleAxisf;
+        using Eigen::Quaternionf;
+
+        auto & camera = window.camera();
+
+        const auto dt = std::max(0.25, time_since_prev);
+
+        const auto ANGULAR_VELOCITY = 1.0;
+        const auto rot_angle = ANGULAR_VELOCITY * time_since_prev;
+
+        float horizontal_rot = 0.0;
+        float vertical_rot = 0.0;
+
+        const Vector3f vertical_axis = camera.right();
+        const Vector3f horizontal_axis = Vector3f::UnitZ();
+
+        if (_look.up) vertical_rot += rot_angle;
+        if (_look.down) vertical_rot -= rot_angle;
+        if (_look.left) horizontal_rot += rot_angle;
+        if (_look.right) horizontal_rot -= rot_angle;
+
+        const auto vrot = AngleAxisf(vertical_rot, vertical_axis);
+        const auto hrot = AngleAxisf(horizontal_rot, horizontal_axis);
+        const Quaternionf new_orientation = hrot * vrot * camera.orientation();
+        camera.set_orientation(new_orientation);
+    }
+
+};
+
 struct CameraKeyController : public merely3d::EventHandler
 {
     struct Strafe
@@ -48,69 +112,38 @@ struct CameraKeyController : public merely3d::EventHandler
     {
         using Eigen::AngleAxisf;
 
-        const auto STRAFE_STEP_LENGTH = 0.5;
-        const auto ANGLE_STEP = 0.05;
         auto & camera = window.camera();
-
-        Eigen::Vector3f strafe_direction = Eigen::Vector3f::Zero();
-        const auto x = Eigen::Vector3f(1.0, 0.0, 0.0);
-        const auto y = Eigen::Vector3f(0.0, 1.0, 0.0);
-        const auto z = Eigen::Vector3f(0.0, 0.0, 1.0);
-
-        Eigen::Vector3f rotation_axis = Eigen::Vector3f::Zero();
-
         const auto strafe_enabled = action == Action::Press || action == Action::Repeat;
 
         switch (key)
         {
-            case Key::W: _strafe.forward = strafe_enabled; break;
-            case Key::S: _strafe.backward = strafe_enabled; break;
-            case Key::A: _strafe.left = strafe_enabled; break;
-            case Key::D: _strafe.right = strafe_enabled; break;
-            case Key::Space: _strafe.up = strafe_enabled; break;
-            case Key::C: _strafe.down = strafe_enabled; break;
-        }
-
-        if (action == Action::Press || action == Action::Repeat)
-        {
-            switch (key)
-            {
-                case Key::Left: rotation_axis += z; break;
-                case Key::Right: rotation_axis -= z; break;
-                case Key::Up: rotation_axis += camera.right(); break;
-                case Key::Down: rotation_axis -= camera.right(); break;
-            }
-
-            rotation_axis.normalize();
-
-            const AngleAxisf rotation = AngleAxisf(ANGLE_STEP, rotation_axis);
-            const Eigen::Quaternionf new_orientation = rotation * camera.orientation();
-
-            camera.set_orientation(new_orientation);
+            case Key::W: _strafe.forward = strafe_enabled; return true;
+            case Key::S: _strafe.backward = strafe_enabled; return true;
+            case Key::A: _strafe.left = strafe_enabled; return true;
+            case Key::D: _strafe.right = strafe_enabled; return true;
+            case Key::Space: _strafe.up = strafe_enabled; return true;
+            case Key::C: _strafe.down = strafe_enabled; return true;
+            default: return false;
         }
     }
 
     virtual void before_frame(Window & window, double time_since_prev)
     {
         using Eigen::AngleAxisf;
+        using Eigen::Vector3f;
 
         const auto STRAFE_VELOCITY = 0.5;
         const auto dt = std::max(0.25, time_since_prev);
         auto & camera = window.camera();
 
-        Eigen::Vector3f strafe_direction = Eigen::Vector3f::Zero();
-        const auto x = Eigen::Vector3f(1.0, 0.0, 0.0);
-        const auto y = Eigen::Vector3f(0.0, 1.0, 0.0);
-        const auto z = Eigen::Vector3f(0.0, 0.0, 1.0);
-
-        Eigen::Vector3f rotation_axis = Eigen::Vector3f::Zero();
+        Vector3f strafe_direction = Eigen::Vector3f::Zero();
 
         if (_strafe.left) strafe_direction -= camera.right();
         if (_strafe.right) strafe_direction += camera.right();
         if (_strafe.forward) strafe_direction += camera.direction();
         if (_strafe.backward) strafe_direction -= camera.direction();
-        if (_strafe.up) strafe_direction += z;
-        if (_strafe.down) strafe_direction -= z;
+        if (_strafe.up) strafe_direction += Vector3f::UnitZ();
+        if (_strafe.down) strafe_direction -= Vector3f::UnitZ();
 
         strafe_direction.normalize();
 
@@ -134,6 +167,7 @@ int main(void)
         window.camera().look_in(Vector3f(1.0, 0.0, -1), Vector3f(0.0, 0.0, 1.0));
         window.camera().set_position(Vector3f(-1.0, 0.0, 3.0));
 
+        window.add_event_handler(std::shared_ptr<EventHandler>(new CameraLookController()));
         window.add_event_handler(std::shared_ptr<EventHandler>(new CameraKeyController()));
 
         while (!window.should_close())
