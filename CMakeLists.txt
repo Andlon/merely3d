@@ -42,7 +42,8 @@ set(LIB_FILES
     src/command_buffer.hpp
     src/renderer.hpp
     src/renderer.cpp
-    src/event_convert.hpp)
+    src/event_convert.hpp
+    src/gl_primitive.hpp)
 
 add_executable(merely ${LIB_FILES} ${LIB_HEADERS})
 

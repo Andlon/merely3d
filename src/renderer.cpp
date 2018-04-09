@@ -1,4 +1,5 @@
 #include "renderer.hpp"
+#include "gl_primitive.hpp"
 
 #include <shaders.hpp>
 
@@ -45,6 +46,22 @@ namespace
              0.5,  0.5, 0.0,
             -0.5,  0.5, 0.0,
             -0.5, -0.5, 0.0
+        };
+    }
+
+    /// Returns the vertices of the unit rectangle,
+    /// defined to lie in the xy-plane (z = 0),
+    /// centered at (0, 0, 0) and with unit length sides.
+    std::vector<float> unit_rectangle_vertices_and_normals()
+    {
+        return {
+             0.5, -0.5, 0.0, 0.0, 0.0, 1.0,
+             0.5,  0.5, 0.0, 0.0, 0.0, 1.0,
+            -0.5,  0.5, 0.0, 0.0, 0.0, 1.0,
+
+            -0.5,  0.5, 0.0, 0.0, 0.0, 1.0,
+            -0.5, -0.5, 0.0, 0.0, 0.0, 1.0,
+             0.5, -0.5, 0.0, 0.0, 0.0, 1.0
         };
     }
 
@@ -164,8 +181,12 @@ namespace
 
 namespace merely3d
 {
-    Renderer::Renderer(ShaderProgram program)
-        : default_program(std::move(program))
+    Renderer::Renderer(ShaderProgram program,
+                       GlPrimitive gl_cube,
+                       GlPrimitive gl_rectangle)
+        : default_program(std::move(program)),
+          gl_cube(std::move(gl_cube)),
+          gl_rectangle(std::move(gl_rectangle))
     {
 
     }
@@ -179,47 +200,15 @@ namespace merely3d
         default_program.attach(vertex_shader);
         default_program.link();
 
-        // Construct VBO and VAO for the unit rectangle
-        // TODO: Add normals
-        const auto rect_verts = unit_rectangle_vertices();
-        const auto rect_idx = unit_rectangle_indices();
-
-        // TODO: Encapsulate all this stuff in a StaticMesh type or similar
-        GLuint rect_vao, rect_vbo, rect_ebo;
-        glGenVertexArrays(1, &rect_vao);
-        glBindVertexArray(rect_vao);
-        glGenBuffers(1, &rect_vbo);
-        glGenBuffers(1, &rect_ebo);
-        glBindBuffer(GL_ARRAY_BUFFER, rect_vbo);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rect_ebo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rect_verts.size(), rect_verts.data(), GL_STATIC_DRAW);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * rect_idx.size(), rect_idx.data(), GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-        glEnableVertexAttribArray(0);
-
-        // Construct VBO and VAO for the unit cube
         const auto cube_verts = unit_cube_vertices_and_normals();
+        auto gl_cube = GlPrimitive::create(cube_verts);
 
-        GLuint cube_vao, cube_vbo;
-        glGenVertexArrays(1, &cube_vao);
-        glBindVertexArray(cube_vao);
-        glGenBuffers(1, &cube_vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, cube_vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * cube_verts.size(), cube_verts.data(), GL_STATIC_DRAW);
-        // Position attribute
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
-        glEnableVertexAttribArray(0);
-        // normal attribute
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-        glEnableVertexAttribArray(1);
+        const auto rect_verts = unit_rectangle_vertices_and_normals();
+        auto gl_rect = GlPrimitive::create(rect_verts);
 
-        Renderer renderer(std::move(default_program));
-        renderer.rectangle_ebo = rect_ebo;
-        renderer.rectangle_vbo = rect_vbo;
-        renderer.rectangle_vao = rect_vao;
-        renderer.cube_vbo = cube_vbo;
-        renderer.cube_vao = cube_vao;
-        return std::move(renderer);
+        return Renderer(std::move(default_program),
+                        std::move(gl_cube),
+                        std::move(gl_rect));
     }
 
     void Renderer::render(const CommandBuffer & buffer,
@@ -262,7 +251,7 @@ namespace merely3d
         // TODO: Make lighting configurable rather than hard-coded
         const Eigen::Vector3f light_dir = Eigen::Vector3f(0.9, 1.2, -0.8).normalized();
 
-        glBindVertexArray(rectangle_vao);
+        gl_rectangle.bind();
 
         default_program.set_vec3_uniform(light_color_loc, light_color_array.data());
         default_program.set_vec3_uniform(light_dir_loc, light_dir.data());
@@ -270,19 +259,21 @@ namespace merely3d
         for (const auto & rectangle : buffer.rectangles())
         {
             const auto & extents = rectangle.shape.extents;
-            const auto scaling = Eigen::DiagonalMatrix<float, 3>(extents.x(), extents.y(), 0.0);
+            const auto scaling = Eigen::DiagonalMatrix<float, 3>(extents.x(), extents.y(), 1.0);
             const Eigen::Affine3f model = Eigen::Translation3f(rectangle.position) *  rectangle.orientation * scaling;
+            const auto normal_transform = Eigen::Matrix3f(model.linear().inverse().transpose());
 
             const auto obj_color_array = rectangle.material.color.into_array();
             default_program.set_mat4_uniform(projection_loc, projection.data());
             default_program.set_mat4_uniform(view_loc, view.data());
             default_program.set_mat4_uniform(model_loc, model.data());
+            default_program.set_mat3_uniform(normal_transform_loc, normal_transform.data());
             default_program.set_vec3_uniform(object_color_loc, obj_color_array.data());
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+            default_program.set_vec3_uniform(view_pos_loc, camera.position().data());
+            glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
-
-        glBindVertexArray(cube_vao);
+        gl_cube.bind();
 
         default_program.set_vec3_uniform(light_color_loc, light_color_array.data());
         default_program.set_vec3_uniform(light_dir_loc, light_dir.data());
