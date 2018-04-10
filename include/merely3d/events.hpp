@@ -177,6 +177,10 @@ namespace merely3d
             return false;
         }
 
+        virtual void mouse_enter(Window & window) { }
+
+        virtual void mouse_leave(Window & window) { }
+
         virtual bool scroll(Window & window, double xoffset, double yoffset)
         {
             return false;

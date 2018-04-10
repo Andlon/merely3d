@@ -99,6 +99,21 @@ namespace merely3d
         }
     }
 
+    void dispatch_mouse_enter_event(Window *window, bool entered)
+    {
+        for (auto & handler : window->_d->event_handlers)
+        {
+            if (entered)
+            {
+                handler->mouse_enter(*window);
+            }
+            else
+            {
+                handler->mouse_leave(*window);
+            }
+        }
+    }
+
     void dispatch_character_input_event(Window *window, unsigned int codepoint)
     {
         for (auto & handler : window->_d->event_handlers)
@@ -162,6 +177,12 @@ namespace merely3d
     {
         auto window_ptr = static_cast<Window *>(glfwGetWindowUserPointer(glfw_window));
         dispatch_mouse_move_event(window_ptr, xpos, ypos);
+    }
+
+    static void cursor_enter_callback(GLFWwindow * glfw_window, int entered)
+    {
+        auto window_ptr = static_cast<Window *>(glfwGetWindowUserPointer(glfw_window));
+        dispatch_mouse_enter_event(window_ptr, static_cast<bool>(entered));
     }
 
     Window::Window(Window && other)
@@ -310,7 +331,7 @@ namespace merely3d
         glfwSetCharCallback(glfw_window, character_input_callback);
         glfwSetScrollCallback(glfw_window, scroll_callback);
         glfwSetCursorPosCallback(glfw_window, cursor_pos_callback);
-
+        glfwSetCursorEnterCallback(glfw_window, cursor_enter_callback);
 
         auto renderer = Renderer::build();
         auto window_ptr = GlfwWindowPtr(glfw_window, glfwDestroyWindow);
