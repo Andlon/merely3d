@@ -99,6 +99,18 @@ namespace merely3d
         }
     }
 
+    void dispatch_scroll_event(Window *window, double xoffset, double yoffset)
+    {
+        for (auto & handler : window->_d->event_handlers)
+        {
+            const auto stop_propagate = handler->scroll(*window, xoffset, yoffset);
+            if (stop_propagate)
+            {
+                break;
+            }
+        }
+    }
+
     static void key_callback(GLFWwindow * glfw_window,
                              int glfw_key,
                              int scancode,
@@ -126,6 +138,12 @@ namespace merely3d
     {
         auto window_ptr = static_cast<Window *>(glfwGetWindowUserPointer(glfw_window));
         dispatch_character_input_event(window_ptr, codepoint);
+    }
+
+    static void scroll_callback(GLFWwindow * glfw_window, double xoffset, double yoffset)
+    {
+        auto window_ptr = static_cast<Window *>(glfwGetWindowUserPointer(glfw_window));
+        dispatch_scroll_event(window_ptr, xoffset, yoffset);
     }
 
     Window::Window(Window && other)
@@ -272,6 +290,7 @@ namespace merely3d
         glfwSetMouseButtonCallback(glfw_window, mouse_button_callback);
         glfwSetKeyCallback(glfw_window, key_callback);
         glfwSetCharCallback(glfw_window, character_input_callback);
+        glfwSetScrollCallback(glfw_window, scroll_callback);
 
 
         auto renderer = Renderer::build();

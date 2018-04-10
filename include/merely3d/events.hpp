@@ -172,6 +172,11 @@ namespace merely3d
             return false;
         }
 
+        virtual bool scroll(Window & window, double xoffset, double yoffset)
+        {
+            return false;
+        }
+
         virtual bool character_input(Window & window,
                                      unsigned int codepoint)
         {
