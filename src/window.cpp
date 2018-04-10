@@ -61,10 +61,10 @@ namespace merely3d
                             int scancode,
                             int modifiers)
     {
-        for (auto & listener : window->_d->event_handlers)
+        for (auto & handler : window->_d->event_handlers)
         {
             const auto stop_propagate =
-                listener->key_press(*window, key, action, scancode, modifiers);
+                    handler->key_press(*window, key, action, scancode, modifiers);
             if (stop_propagate)
             {
                 break;
@@ -72,7 +72,22 @@ namespace merely3d
         }
     }
 
-    static void key_callback(GLFWwindow* glfw_window,
+    void dispatch_mouse_button_event(Window * window,
+                                     MouseButton button,
+                                     Action action,
+                                     int modifiers)
+    {
+        for (auto & handler : window->_d->event_handlers)
+        {
+            const auto stop_propagate = handler->mouse_button_press(*window, button, action, modifiers);
+            if (stop_propagate)
+            {
+                break;
+            }
+        }
+    }
+
+    static void key_callback(GLFWwindow * glfw_window,
                              int glfw_key,
                              int scancode,
                              int glfw_action,
@@ -82,6 +97,18 @@ namespace merely3d
         const auto key = key_from_glfw(glfw_key);
         const auto action = action_from_glfw(glfw_action);
         dispatch_key_event(window_ptr, key, action, scancode, mods);
+    }
+
+    static void mouse_button_callback(GLFWwindow * glfw_window,
+                                      int glfw_button,
+                                      int glfw_action,
+                                      int mods)
+    {
+        std::cout << "Got mouse button callback!" << std::endl;
+        auto window_ptr = static_cast<Window *>(glfwGetWindowUserPointer(glfw_window));
+        const auto button = mouse_button_from_glfw(glfw_button);
+        const auto action = action_from_glfw(glfw_action);
+        dispatch_mouse_button_event(window_ptr, button, action, mods);
     }
 
     Window::Window(Window && other)
@@ -220,7 +247,9 @@ namespace merely3d
             throw std::runtime_error("Failed to initialize GLAD");
         }
 
+        glfwSetMouseButtonCallback(glfw_window, mouse_button_callback);
         glfwSetKeyCallback(glfw_window, key_callback);
+
 
         auto renderer = Renderer::build();
         auto window_ptr = GlfwWindowPtr(glfw_window, glfwDestroyWindow);

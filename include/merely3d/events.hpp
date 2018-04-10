@@ -4,6 +4,14 @@ namespace merely3d
 {
     class Window;
 
+    enum class MouseButton
+    {
+        Left,
+        Right,
+        Middle,
+        Other
+    };
+
     enum class Key
     {
         A,
@@ -63,6 +71,14 @@ namespace merely3d
                                Action action,
                                int scancode,
                                int modifiers)
+        {
+            return false;
+        }
+
+        virtual bool mouse_button_press(Window & window,
+                                        MouseButton button,
+                                        Action action,
+                                        int modifiers)
         {
             return false;
         }

@@ -8,6 +8,17 @@
 
 namespace merely3d
 {
+    inline MouseButton mouse_button_from_glfw(int glfw_button)
+    {
+        switch (glfw_button)
+        {
+            case GLFW_MOUSE_BUTTON_LEFT: return MouseButton::Left;
+            case GLFW_MOUSE_BUTTON_RIGHT: return MouseButton::Right;
+            case GLFW_MOUSE_BUTTON_MIDDLE: return MouseButton::Middle;
+            default: return MouseButton::Other;
+        }
+    }
+
     // TODO: Move this to CPP file to avoid massive code bloat?
     // (unless the compiler is sufficiently smart to creating a separate function,
     // but this is perhaps unlikely to occur in debug mode at the very least)
