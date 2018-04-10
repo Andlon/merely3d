@@ -101,7 +101,7 @@ namespace merely3d
         if (_d)
         {
             // TODO: Destroy ALL vertex buffers/objects and so forth
-            glfwMakeContextCurrent(_d->glfw_window.get());
+            make_current();
             delete _d;
         }
     }
@@ -116,7 +116,6 @@ namespace merely3d
     void Window::render_frame_impl(Frame & frame)
     {
         assert(_d);
-        glfwMakeContextCurrent(_d->glfw_window.get());
 
         auto & vp_width = _d->viewport_size.first;
         auto & vp_height = _d->viewport_size.second;
@@ -127,9 +126,9 @@ namespace merely3d
 
         get_command_buffer()->clear();
 
-        glfwSwapBuffers(_d->glfw_window.get());
-
         end_frame();
+
+        glfwSwapBuffers(_d->glfw_window.get());
 
         glfwPollEvents();
     }
@@ -184,6 +183,15 @@ namespace merely3d
     CommandBuffer * Window::get_command_buffer()
     {
         return &_d->command_buffer;
+    }
+
+    GLFWwindow *Window::glfw_window() {
+        return _d->glfw_window.get();
+    }
+
+    void Window::make_current()
+    {
+        glfwMakeContextCurrent(_d->glfw_window.get());
     }
 
     Window WindowBuilder::build() const

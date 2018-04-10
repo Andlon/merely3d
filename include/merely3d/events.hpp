@@ -1,7 +1,5 @@
 #pragma once
 
-#include <merely3d/window.hpp>
-
 namespace merely3d
 {
     class Window;

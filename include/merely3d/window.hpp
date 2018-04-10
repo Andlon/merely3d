@@ -6,6 +6,8 @@
 #include <merely3d/camera.hpp>
 #include <merely3d/events.hpp>
 
+class GLFWwindow;
+
 namespace merely3d
 {
     class CommandBuffer;
@@ -22,6 +24,7 @@ namespace merely3d
         template <typename RenderFunc>
         void render_frame(RenderFunc && render_func)
         {
+            make_current();
             begin_frame();
             auto buffer = get_command_buffer();
             Frame frame(buffer);
@@ -33,6 +36,15 @@ namespace merely3d
         const Camera & camera() const;
 
         void add_event_handler(std::shared_ptr<EventHandler> handler);
+
+        /// Returns a pointer to the underlying GLFW window.
+        ///
+        /// Using this pointer is very unsafe, and in principle there are no
+        /// guarantees that changing any GLFW state can be done safely.
+        /// Use with caution! (And preferably, don't use at all).
+        GLFWwindow * glfw_window();
+
+        void make_current();
 
     private:
         friend class WindowBuilder;
