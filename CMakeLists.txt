@@ -55,5 +55,4 @@ target_include_directories(merely3d SYSTEM PRIVATE ${OPENGL_INCLUDE_DIR})
 target_link_libraries(merely3d glad glfw ${OPENGL_gl_LIBRARY})
 target_link_libraries(merely3d Eigen3::Eigen)
 
-add_executable(merely src/main.cpp)
-target_link_libraries(merely merely3d)
+add_subdirectory(${CMAKE_SOURCE_DIR}/examples)
