@@ -312,6 +312,14 @@ namespace merely3d
         }
     }
 
+    WindowSize Window::size() const
+    {
+        WindowSize size;
+        auto glfw_window = _d->glfw_window.get();
+        glfwGetWindowSize(glfw_window, &size.width, &size.height);
+        return size;
+    }
+
     Window WindowBuilder::build() const
     {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);

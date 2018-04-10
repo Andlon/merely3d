@@ -24,6 +24,12 @@ namespace merely3d
         Disabled
     };
 
+    struct WindowSize
+    {
+        int width;
+        int height;
+    };
+
     class Window final
     {
     public:
@@ -61,6 +67,9 @@ namespace merely3d
         void poll_events();
 
         void set_cursor_mode(CursorMode mode);
+
+        /// Returns the size of the windows in screen coordinates (not necessarily pixels).
+        WindowSize size() const;
 
     private:
         friend class WindowBuilder;
