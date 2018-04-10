@@ -46,6 +46,8 @@ namespace merely3d
 
         void make_current();
 
+        void poll_events();
+
     private:
         friend class WindowBuilder;
         friend void dispatch_key_event(Window *, Key, Action, int, int);

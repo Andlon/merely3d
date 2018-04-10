@@ -157,7 +157,7 @@ namespace merely3d
 
         glfwSwapBuffers(_d->glfw_window.get());
 
-        glfwPollEvents();
+        poll_events();
     }
 
     bool Window::should_close() const
@@ -219,6 +219,11 @@ namespace merely3d
     void Window::make_current()
     {
         glfwMakeContextCurrent(_d->glfw_window.get());
+    }
+
+    void Window::poll_events()
+    {
+        glfwPollEvents();
     }
 
     Window WindowBuilder::build() const
