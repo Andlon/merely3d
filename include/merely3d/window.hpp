@@ -12,6 +12,18 @@ namespace merely3d
 {
     class CommandBuffer;
 
+    /// The cursor mode determines how the window handles cursor movement.
+    enum class CursorMode
+    {
+        /// Normal cursor movement.
+        Normal,
+        /// Normal cursor movement, but the cursor itself is invisible.
+        Hidden,
+        /// Cursor is disabled, but motion is still registered. Often used to implement
+        /// mouse look cameras.
+        Disabled
+    };
+
     class Window final
     {
     public:
@@ -47,6 +59,8 @@ namespace merely3d
         void make_current();
 
         void poll_events();
+
+        void set_cursor_mode(CursorMode mode);
 
     private:
         friend class WindowBuilder;

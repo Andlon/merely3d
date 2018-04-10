@@ -300,6 +300,18 @@ namespace merely3d
         glfwPollEvents();
     }
 
+    void Window::set_cursor_mode(CursorMode mode)
+    {
+        auto glfw_window = _d->glfw_window.get();
+
+        switch (mode)
+        {
+            case CursorMode::Normal: glfwSetInputMode(glfw_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL); break;
+            case CursorMode::Hidden: glfwSetInputMode(glfw_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN); break;
+            case CursorMode::Disabled: glfwSetInputMode(glfw_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); break;
+        }
+    }
+
     Window WindowBuilder::build() const
     {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
