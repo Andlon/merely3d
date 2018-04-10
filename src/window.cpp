@@ -104,7 +104,6 @@ namespace merely3d
                                       int glfw_action,
                                       int mods)
     {
-        std::cout << "Got mouse button callback!" << std::endl;
         auto window_ptr = static_cast<Window *>(glfwGetWindowUserPointer(glfw_window));
         const auto button = mouse_button_from_glfw(glfw_button);
         const auto action = action_from_glfw(glfw_action);
