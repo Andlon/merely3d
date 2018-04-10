@@ -1,4 +1,6 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.1)
+
+set (CMAKE_CXX_STANDARD 11)
 
 include(${CMAKE_SOURCE_DIR}/cmake/embed_shaders.cmake)
 
@@ -34,7 +36,6 @@ set(LIB_HEADERS
     include/merely3d/color.hpp)
 
 set(LIB_FILES
-    src/main.cpp
     src/window.cpp
     src/frame.cpp
     src/shader.hpp
@@ -45,10 +46,14 @@ set(LIB_FILES
     src/event_convert.hpp
     src/gl_primitive.hpp)
 
-add_executable(merely ${LIB_FILES} ${LIB_HEADERS})
 
-target_include_directories(merely SYSTEM PRIVATE ${OPENGL_INCLUDE_DIR})
-target_include_directories(merely SYSTEM PUBLIC include)
-target_include_directories(merely PRIVATE ${CONFIGURED_DIR})
-target_link_libraries(merely glad glfw ${OPENGL_gl_LIBRARY})
-target_link_libraries(merely Eigen3::Eigen)
+add_library(merely3d ${LIB_FILES} ${LIB_HEADERS})
+
+target_include_directories(merely3d PUBLIC include)
+target_include_directories(merely3d PRIVATE ${CONFIGURED_DIR})
+target_include_directories(merely3d SYSTEM PRIVATE ${OPENGL_INCLUDE_DIR})
+target_link_libraries(merely3d glad glfw ${OPENGL_gl_LIBRARY})
+target_link_libraries(merely3d Eigen3::Eigen)
+
+add_executable(merely src/main.cpp)
+target_link_libraries(merely merely3d)

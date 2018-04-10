@@ -11,7 +11,6 @@ function(embed_shaders shader_dir shader_header_src shader_configured_path)
         string(CONCAT shaders_cpp_source
                 "${shaders_cpp_source}"
                 "\nconst char * ${shader_name} = R\"~~~(\n" "${shader_body}" "\n)~~~\";\n" )
-        message("${shaders_cpp_source_temp}")
     endforeach()
 
     configure_file("${shader_header_src}" "${shader_configured_path}")
