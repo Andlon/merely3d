@@ -52,6 +52,7 @@ namespace merely3d
         friend class WindowBuilder;
         friend void dispatch_key_event(Window *, Key, Action, int, int);
         friend void dispatch_mouse_button_event(Window *, MouseButton, Action, int);
+        friend void dispatch_character_input_event(Window * window, unsigned int codepoint);
         class WindowData;
 
         Window(WindowData * data);

@@ -172,6 +172,12 @@ namespace merely3d
             return false;
         }
 
+        virtual bool character_input(Window & window,
+                                     unsigned int codepoint)
+        {
+            return false;
+        }
+
         virtual void before_frame(Window & window, double time_since_previous_frame_begin) {}
         virtual void after_frame(Window & window, double frame_duration) {}
     };
