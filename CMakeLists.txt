@@ -2,12 +2,12 @@ cmake_minimum_required(VERSION 3.1)
 
 set (CMAKE_CXX_STANDARD 11)
 
-include(${CMAKE_SOURCE_DIR}/cmake/embed_shaders.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/embed_shaders.cmake)
 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-add_subdirectory("extern/glfw-3.2.1")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/extern/glfw-3.2.1")
 
 find_package(OpenGL REQUIRED)
 find_package(Eigen3 3 REQUIRED NO_MODULE)
@@ -21,8 +21,8 @@ set(GLAD_FILES
 add_library(glad STATIC ${GLAD_FILES})
 target_include_directories(glad SYSTEM PUBLIC extern/glad/include)
 
-set(CONFIGURED_DIR "${CMAKE_BINARY_DIR}/configured")
-set(SHADER_DIR "${CMAKE_SOURCE_DIR}/shaders")
+set(CONFIGURED_DIR "${CMAKE_CURRENT_BINARY_DIR}/configured")
+set(SHADER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/shaders")
 embed_shaders(${SHADER_DIR} src/shaders.hpp.in ${CONFIGURED_DIR}/shaders.hpp)
 
 set(LIB_HEADERS
@@ -55,4 +55,4 @@ target_include_directories(merely3d SYSTEM PRIVATE ${OPENGL_INCLUDE_DIR})
 target_link_libraries(merely3d glad glfw ${OPENGL_gl_LIBRARY})
 target_link_libraries(merely3d Eigen3::Eigen)
 
-add_subdirectory(${CMAKE_SOURCE_DIR}/examples)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/examples)
