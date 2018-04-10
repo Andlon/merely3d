@@ -242,7 +242,7 @@ namespace merely3d
         const auto aspect_ratio = width > 0.0 && height > 0.0
                                   ? width / height
                                   : 1.0;
-        const auto projection = projection_matrix(1.57, aspect_ratio, 0.1);
+        const auto projection = projection_matrix(camera.fovy(), aspect_ratio, 0.1);
         const Eigen::Affine3f view = camera.transform().inverse();
 
         const auto light_color = Color(1.0, 1.0, 1.0);

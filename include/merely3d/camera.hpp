@@ -18,10 +18,14 @@ namespace merely3d
         Eigen::Quaternionf orientation() const;
         Eigen::Affine3f transform() const;
 
+        float fovy() const;
+
         void set_position(const Eigen::Vector3f & position);
 
         template <typename IntoRotation>
         void set_orientation(const IntoRotation & orientation);
+
+        void set_fovy(float fovy);
 
         void look_in(const Eigen::Vector3f & direction,
                      const Eigen::Vector3f & up);
@@ -29,12 +33,13 @@ namespace merely3d
     private:
         Eigen::Vector3f _position;
         Eigen::Quaternionf _orientation;
-        // Eigen::Affine3f _transform;
+        float _fovy;
     };
 
     inline Camera::Camera()
         : _position(Eigen::Vector3f::Zero()),
-          _orientation(Eigen::Quaternionf::Identity())
+          _orientation(Eigen::Quaternionf::Identity()),
+          _fovy(1.57)
     {
 
     }
@@ -69,6 +74,11 @@ namespace merely3d
         return Eigen::Translation3f(_position) * _orientation;
     }
 
+    inline float Camera::fovy() const
+    {
+        return _fovy;
+    }
+
     inline void Camera::set_position(const Eigen::Vector3f & position)
     {
         _position = position;
@@ -78,6 +88,12 @@ namespace merely3d
     inline void Camera::set_orientation(const IntoRotation & orientation)
     {
         _orientation = orientation;
+    }
+
+    inline void Camera::set_fovy(float fovy)
+    {
+        assert(_fovy > 0.0 && fovy < 3.14);
+        _fovy = fovy;
     }
 
     inline void Camera::look_in(const Eigen::Vector3f & direction,
