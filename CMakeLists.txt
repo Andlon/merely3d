@@ -33,7 +33,8 @@ set(LIB_HEADERS
     include/merely3d/camera.hpp
     include/merely3d/primitives.hpp
     include/merely3d/events.hpp
-    include/merely3d/color.hpp)
+    include/merely3d/color.hpp
+    include/merely3d/camera_controller.hpp)
 
 set(LIB_FILES
     src/window.cpp
