@@ -22,6 +22,8 @@ namespace merely3d
         template <typename Shape>
         void draw(const Renderable<Shape> &renderable);
 
+        void draw_line(const Line & line);
+
     private:
         Frame(CommandBuffer * buffer) : _buffer(buffer) {}
         ~Frame() {}

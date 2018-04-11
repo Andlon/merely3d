@@ -25,4 +25,9 @@ namespace merely3d
     {
         _buffer->push_renderable(sphere);
     }
+
+    void Frame::draw_line(const merely3d::Line &line)
+    {
+        _buffer->push_line(line);
+    }
 }

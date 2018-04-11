@@ -8,6 +8,7 @@
 #include "shader.hpp"
 #include "command_buffer.hpp"
 #include "gl_primitive.hpp"
+#include "gl_line.hpp"
 
 namespace merely3d
 {
@@ -26,16 +27,20 @@ namespace merely3d
         static Renderer build();
 
     private:
-        Renderer(ShaderProgram program,
+        Renderer(ShaderProgram default_program,
+                 ShaderProgram basic_program,
                  GlPrimitive gl_cube,
                  GlPrimitive gl_rectangle,
-                 GlPrimitive gl_sphere);
+                 GlPrimitive gl_sphere,
+                 GlLine gl_line);
 
         ShaderProgram default_program;
+        ShaderProgram basic_shader_program;
 
         GlPrimitive gl_rectangle;
         GlPrimitive gl_cube;
         GlPrimitive gl_sphere;
+        GlLine      gl_line;
 
         size_t num_sphere_vertices;
     };

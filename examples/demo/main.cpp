@@ -19,6 +19,7 @@ using merely3d::EventHandler;
 using merely3d::Material;
 using merely3d::Color;
 using merely3d::CameraController;
+using merely3d::Line;
 
 using merely3d::red;
 
@@ -74,6 +75,8 @@ int main()
 
             frame.draw(renderable(Sphere(1.0))
                         .with_position(3.0, 3.0, 3.0));
+
+            frame.draw_line(Line(Vector3f(0.0, 0.0, 0.0), Vector3f(10.0, -5.0, 10.0)));
 
             const auto floor_color = Color(0.5f, 0.35f, 0.35f);
             frame.draw(renderable(Rectangle(20.0f, 20.0f))

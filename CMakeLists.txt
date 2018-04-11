@@ -49,7 +49,8 @@ set(LIB_FILES
     src/event_convert.hpp
     src/gl_primitive.hpp
     src/app.cpp
-    src/mesh_util.hpp)
+    src/mesh_util.hpp
+    src/gl_line.hpp)
 
 
 add_library(merely3d ${LIB_FILES} ${LIB_HEADERS})

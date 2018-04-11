@@ -1,7 +1,7 @@
 #pragma once
 
-#include <GLFW/glfw3.h>
 #include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 #include <vector>
 
@@ -59,8 +59,11 @@ namespace merely3d
     {
         const auto num_v = vertices_and_normals.size();
 
-        // Should be triangles of 3 vertices, each 3 floats
-        assert(num_v % 9 == 0);
+        // Should be triangles of 3 vertices, each 3 floats,
+        // plus 3 floats for each vertex corresponding to its normal vector
+        assert(vertices_and_normals.size() % 18 == 0);
+
+        const auto num_vertices = vertices_and_normals.size() / 6;
 
         const auto & v = vertices_and_normals.data();
         GLuint vao, vbo;
@@ -68,7 +71,7 @@ namespace merely3d
         glBindVertexArray(vao);
         glGenBuffers(1, &vbo);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * num_v, v, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices_and_normals.size(), v, GL_STATIC_DRAW);
 
         // Position attribute
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
@@ -79,7 +82,7 @@ namespace merely3d
 
         glBindVertexArray(0);
 
-        return GlPrimitive(vao, vbo, num_v / 3);
+        return GlPrimitive(vao, vbo, num_vertices);
     }
 
     inline void GlPrimitive::bind()

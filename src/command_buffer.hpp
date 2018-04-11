@@ -19,14 +19,18 @@ namespace merely3d
         template <typename Shape>
         void push_renderable(const Renderable<Shape> & renderable);
 
+        void push_line(const Line & line);
+
         const std::vector<Renderable<Rectangle>> &  rectangles() const;
         const std::vector<Renderable<Box>> &        boxes() const;
         const std::vector<Renderable<Sphere>> &     spheres() const;
+        const std::vector<Line> &                   lines() const;
 
     private:
         std::vector<Renderable<Rectangle>>  _rectangles;
         std::vector<Renderable<Box>>        _boxes;
         std::vector<Renderable<Sphere>>     _spheres;
+        std::vector<Line>                   _lines;
     };
 
     inline void CommandBuffer::clear()
@@ -34,6 +38,7 @@ namespace merely3d
         _rectangles.clear();
         _boxes.clear();
         _spheres.clear();
+        _lines.clear();
     }
 
     inline const std::vector<Renderable<Rectangle>> & CommandBuffer::rectangles() const
@@ -49,6 +54,10 @@ namespace merely3d
     inline const std::vector<Renderable<Sphere>> & CommandBuffer::spheres() const
     {
         return _spheres;
+    }
+
+    inline const std::vector<Line> & CommandBuffer::lines() const {
+        return _lines;
     }
 
     template<typename Shape>
@@ -73,6 +82,11 @@ namespace merely3d
     inline void CommandBuffer::push_renderable(const Renderable<Sphere> &renderable)
     {
         _spheres.push_back(renderable);
+    }
+
+    inline void CommandBuffer::push_line(const Line &line)
+    {
+        _lines.push_back(line);
     }
 }
 
