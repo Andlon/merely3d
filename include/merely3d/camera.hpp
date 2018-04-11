@@ -3,6 +3,8 @@
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
 
+#include <merely3d/types.hpp>
+
 namespace merely3d
 {
     class Camera
@@ -31,8 +33,8 @@ namespace merely3d
                      const Eigen::Vector3f & up);
 
     private:
-        Eigen::Vector3f _position;
-        Eigen::Quaternionf _orientation;
+        Eigen::Vector3f      _position;
+        UnalignedQuaternionf _orientation;
         float _fovy;
     };
 

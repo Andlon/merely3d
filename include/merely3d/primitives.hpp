@@ -1,5 +1,6 @@
 #pragma once
 
+#include <merely3d/types.hpp>
 #include <merely3d/material.hpp>
 #include <Eigen/Dense>
 
@@ -12,7 +13,7 @@ namespace merely3d
         Rectangle(float x_extent, float y_extent)
             : extents(Eigen::Vector2f(x_extent, y_extent)) {}
 
-        Eigen::Vector2f extents;
+        UnalignedVector2f extents;
     };
 
     struct Box

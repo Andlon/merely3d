@@ -3,17 +3,18 @@
 #include <Eigen/Dense>
 
 #include <merely3d/material.hpp>
+#include <merely3d/types.hpp>
 
 namespace merely3d
 {
     template <typename Shape>
     struct Renderable
     {
-        Shape               shape;
-        Eigen::Vector3f     position;
-        Eigen::Quaternionf  orientation;
-        Eigen::Vector3f     scale;
-        Material            material;
+        Shape                   shape;
+        Eigen::Vector3f         position;
+        UnalignedQuaternionf    orientation;
+        Eigen::Vector3f         scale;
+        Material                material;
 
         Renderable(Shape shape)
                 : shape(std::move(shape)),
