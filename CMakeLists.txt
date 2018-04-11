@@ -34,7 +34,8 @@ set(LIB_HEADERS
     include/merely3d/primitives.hpp
     include/merely3d/events.hpp
     include/merely3d/color.hpp
-    include/merely3d/camera_controller.hpp)
+    include/merely3d/camera_controller.hpp
+    include/merely3d/app.hpp)
 
 set(LIB_FILES
     src/window.cpp
@@ -45,7 +46,8 @@ set(LIB_FILES
     src/renderer.hpp
     src/renderer.cpp
     src/event_convert.hpp
-    src/gl_primitive.hpp)
+    src/gl_primitive.hpp
+    src/app.cpp)
 
 
 add_library(merely3d ${LIB_FILES} ${LIB_HEADERS})
