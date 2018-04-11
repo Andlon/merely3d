@@ -2,44 +2,22 @@
 
 #include <merely3d/material.hpp>
 #include <merely3d/primitives.hpp>
+#include <merely3d/renderable.hpp>
 
 #include <Eigen/Dense>
+
+#include <type_traits>
 #include <vector>
 
 namespace merely3d
 {
-    template <typename Shape>
-    struct Renderable
-    {
-        Shape               shape;
-        Eigen::Vector3f     position;
-        Eigen::Quaternionf  orientation;
-        Material            material;
-
-        Renderable(const Shape & shape,
-                   const Eigen::Vector3f & position,
-                   const Eigen::Quaternionf & orientation,
-                   const Material & material)
-            :   shape(shape),
-                position(position),
-                orientation(orientation),
-                material(material)
-        {}
-    };
-
     class CommandBuffer
     {
     public:
         void clear();
-        void push_rectangle(const Rectangle & rectangle,
-                            const Eigen::Vector3f & position,
-                            const Eigen::Quaternionf & orientation,
-                            const Material & material);
 
-        void push_box(const Box & box,
-                      const Eigen::Vector3f & position,
-                      const Eigen::Quaternionf & orientation,
-                      const Material & material);
+        template <typename Shape>
+        void push_renderable(const Renderable<Shape> & renderable);
 
         const std::vector<Renderable<Rectangle>> &  rectangles() const;
         const std::vector<Renderable<Box>> &        boxes() const;
@@ -55,22 +33,6 @@ namespace merely3d
         _boxes.clear();
     }
 
-    inline void CommandBuffer::push_rectangle(const Rectangle & rectangle,
-                                              const Eigen::Vector3f & position,
-                                              const Eigen::Quaternionf & orientation,
-                                              const Material & material)
-    {
-        _rectangles.push_back(Renderable<Rectangle>(rectangle, position, orientation, material));
-    }
-
-    inline void CommandBuffer::push_box(const Box & box,
-                                        const Eigen::Vector3f & position,
-                                        const Eigen::Quaternionf & orientation,
-                                        const Material & material)
-    {
-        _boxes.push_back(Renderable<Box>(box, position, orientation, material));
-    }
-
     inline const std::vector<Renderable<Rectangle>> & CommandBuffer::rectangles() const
     {
         return _rectangles;
@@ -79,6 +41,24 @@ namespace merely3d
     inline const std::vector<Renderable<Box>> & CommandBuffer::boxes() const
     {
         return _boxes;
+    }
+
+    template<typename Shape>
+    inline void CommandBuffer::push_renderable(const Renderable <Shape> & renderable)
+    {
+        static_assert(!std::is_same<Shape, Shape>::value, "Shape not supported");
+    }
+
+    template <>
+    inline void CommandBuffer::push_renderable(const Renderable<Box> & renderable)
+    {
+        _boxes.push_back(renderable);
+    }
+
+    template <>
+    inline void CommandBuffer::push_renderable(const Renderable<Rectangle> & renderable)
+    {
+        _rectangles.push_back(renderable);
     }
 }
 

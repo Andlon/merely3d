@@ -8,19 +8,15 @@ using Eigen::DiagonalMatrix;
 
 namespace merely3d
 {
-    void Frame::draw_rectangle(const Rectangle & shape,
-                        const Position & position,
-                        const Orientation & orientation,
-                        const Material & material)
+    template <>
+    void Frame::draw_renderable(const merely3d::Renderable<Box> &renderable)
     {
-        _buffer->push_rectangle(shape, position, orientation, material);
+        _buffer->push_renderable(renderable);
     }
 
-    void Frame::draw_box(const Box & shape,
-                         const Position & position,
-                         const Orientation & orientation,
-                         const Material & material)
+    template <>
+    void Frame::draw_renderable(const merely3d::Renderable<Rectangle> &renderable)
     {
-        _buffer->push_box(shape, position, orientation, material);
+        _buffer->push_renderable(renderable);
     }
 }

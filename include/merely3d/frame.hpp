@@ -1,11 +1,11 @@
 #pragma once
 
+#include <type_traits>
+
 #include <merely3d/types.hpp>
 #include <merely3d/material.hpp>
 #include <merely3d/primitives.hpp>
-
-// TODO: Use pimpl to avoid these includes, see below
-#include <vector>
+#include <merely3d/renderable.hpp>
 
 namespace merely3d
 {
@@ -27,6 +27,9 @@ namespace merely3d
                       const Orientation & orientation = Orientation::Identity(),
                       const Material & material = Material());
 
+        template <typename Shape>
+        void draw_renderable(const Renderable<Shape> & renderable);
+
     private:
         Frame(CommandBuffer * buffer) : _buffer(buffer) {}
         ~Frame() {}
@@ -34,4 +37,32 @@ namespace merely3d
 
         CommandBuffer * _buffer;
     };
+
+    template <>
+    void Frame::draw_renderable(const merely3d::Renderable<Box> & renderable);
+
+    template <>
+    void Frame::draw_renderable(const merely3d::Renderable<Rectangle> & rectangle);
+
+    template <typename Shape>
+    void Frame::draw_renderable(const merely3d::Renderable<Shape> & renderable)
+    {
+        static_assert(!std::is_same<Shape, Shape>::value, "");
+    }
+
+    inline void Frame::draw_box(const Box &shape,
+                         const Position &position,
+                         const Orientation &orientation,
+                         const Material &material)
+    {
+        draw_renderable(Renderable<Box>(shape, position, orientation, Eigen::Vector3f(1.0f, 1.0f, 1.0f), material));
+    }
+
+    inline void Frame::draw_rectangle(const Rectangle & shape,
+                               const Position & position,
+                               const Orientation & orientation,
+                               const Material & material)
+    {
+        draw_renderable(Renderable<Rectangle>(shape, position, orientation, Eigen::Vector3f(1.0f, 1.0f, 1.0f), material));
+    }
 }

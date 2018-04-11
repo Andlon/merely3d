@@ -27,6 +27,7 @@ embed_shaders(${SHADER_DIR} src/shaders.hpp.in ${CONFIGURED_DIR}/shaders.hpp)
 
 set(LIB_HEADERS
     include/merely3d/window.hpp
+    include/merely3d/renderable.hpp
     include/merely3d/frame.hpp
     include/merely3d/types.hpp
     include/merely3d/material.hpp
