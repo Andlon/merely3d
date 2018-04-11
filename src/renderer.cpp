@@ -54,14 +54,23 @@ namespace
     /// centered at (0, 0, 0) and with unit length sides.
     std::vector<float> unit_rectangle_vertices_and_normals()
     {
+        // We render both faces with opposite normals
         return {
+             // Front
              0.5, -0.5, 0.0, 0.0, 0.0, 1.0,
              0.5,  0.5, 0.0, 0.0, 0.0, 1.0,
             -0.5,  0.5, 0.0, 0.0, 0.0, 1.0,
-
             -0.5,  0.5, 0.0, 0.0, 0.0, 1.0,
             -0.5, -0.5, 0.0, 0.0, 0.0, 1.0,
-             0.5, -0.5, 0.0, 0.0, 0.0, 1.0
+             0.5, -0.5, 0.0, 0.0, 0.0, 1.0,
+
+             // Back
+            -0.5,  0.5, 0.0, 0.0, 0.0, -1.0,
+             0.5,  0.5, 0.0, 0.0, 0.0, -1.0,
+             0.5, -0.5, 0.0, 0.0, 0.0, -1.0,
+             0.5, -0.5, 0.0, 0.0, 0.0, -1.0,
+            -0.5, -0.5, 0.0, 0.0, 0.0, -1.0,
+            -0.5,  0.5, 0.0, 0.0, 0.0, -1.0,
         };
     }
 
@@ -105,12 +114,12 @@ namespace
     {
         // vertices and normals courtesy of learnopengl.com
         return {
-            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+             0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
              0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-             0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-             0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
             -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+             0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
             -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
              0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
@@ -126,12 +135,12 @@ namespace
             -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
             -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
 
-             0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+             0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
              0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-             0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-             0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-             0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
              0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+             0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+             0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+             0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
 
             -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
              0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
@@ -140,12 +149,12 @@ namespace
             -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
             -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
 
-            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
              0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
             -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f
         };
     }
 
@@ -250,6 +259,10 @@ namespace merely3d
 
         // TODO: Make lighting configurable rather than hard-coded
         const Eigen::Vector3f light_dir = Eigen::Vector3f(0.9, 1.2, -0.8).normalized();
+
+        // Face culling is necessary to properly render rectangles from both sides
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
 
         gl_rectangle.bind();
 
