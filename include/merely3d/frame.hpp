@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Eigen/Dense>
+
 #include <type_traits>
 
 #include <merely3d/types.hpp>
@@ -18,13 +20,13 @@ namespace merely3d
         Frame(Frame &&) = delete;
 
         void draw_rectangle(const Rectangle & shape,
-                            const Position & position = Position::Zero(),
-                            const Orientation & orientation = Orientation::Identity(),
+                            const Eigen::Vector3f & position = Eigen::Vector3f::Zero(),
+                            const Eigen::Quaternionf & orientation = Eigen::Quaternionf::Identity(),
                             const Material & material = Material());
 
         void draw_box(const Box & shape,
-                      const Position & position = Position::Zero(),
-                      const Orientation & orientation = Orientation::Identity(),
+                      const Eigen::Vector3f & position = Eigen::Vector3f::Zero(),
+                      const Eigen::Quaternionf & orientation = Eigen::Quaternionf::Identity(),
                       const Material & material = Material());
 
         template <typename Shape>
@@ -51,16 +53,16 @@ namespace merely3d
     }
 
     inline void Frame::draw_box(const Box &shape,
-                         const Position &position,
-                         const Orientation &orientation,
+                         const Eigen::Vector3f &position,
+                         const Eigen::Quaternionf &orientation,
                          const Material &material)
     {
         draw_renderable(Renderable<Box>(shape, position, orientation, Eigen::Vector3f(1.0f, 1.0f, 1.0f), material));
     }
 
     inline void Frame::draw_rectangle(const Rectangle & shape,
-                               const Position & position,
-                               const Orientation & orientation,
+                               const Eigen::Vector3f & position,
+                               const Eigen::Quaternionf & orientation,
                                const Material & material)
     {
         draw_renderable(Renderable<Rectangle>(shape, position, orientation, Eigen::Vector3f(1.0f, 1.0f, 1.0f), material));

@@ -20,14 +20,11 @@ using merely3d::Material;
 using merely3d::Color;
 using merely3d::CameraController;
 
-using merely3d::Position;
-using merely3d::Orientation;
-using merely3d::Vector3;
-using merely3d::Vector2;
-
+using Eigen::Vector2f;
 using Eigen::Vector3f;
+using Eigen::Quaternionf;
 
-int main(void)
+int main()
 {
     // Constructing the app first is essential: it makes sure that
     // GLFW is set up properly. Note that as an alternative, you can call
@@ -52,18 +49,18 @@ int main(void)
         window.render_frame([] (Frame & frame)
         {
             const auto rect_material = Material().with_color(Color(0.5, 0.3, 0.3));
-            Orientation orientation = Orientation::Identity();
-            orientation = Eigen::AngleAxisf(0.78, Eigen::Vector3f(1.0, 0.0, 0.0));
-            frame.draw_rectangle(Vector2(0.5, 0.5),
-                                 Position(1.0, 0.0, 0.05),
+            Quaternionf orientation = Quaternionf::Identity();
+            orientation = Eigen::AngleAxisf(0.78, Vector3f(1.0f, 0.0f, 0.0f));
+            frame.draw_rectangle(Vector2f(0.5f, 0.5f),
+                                 Vector3f(1.0f, 0.0f, 0.05f),
                                  orientation,
                                  rect_material);
-            frame.draw_box(Vector3(1.0, 1.0, 1.0), Position(4.0, 0.0, 0.1));
+            frame.draw_box(Vector3f(1.0f, 1.0f, 1.0f), Vector3f(4.0f, 0.0f, 0.1f));
 
-            frame.draw_box(Vector3(0.3, 5.0, 3.0), Position(0.0, 0.0, 0.0));
-            frame.draw_box(Vector3(0.2, 1.0, 1.0),
-                           Position(0.0, 0.0, 5.0),
-                           Orientation(Eigen::AngleAxisf(0.5, Vector3(1.0, 1.0, 1.0))),
+            frame.draw_box(Vector3f(0.3f, 5.0f, 3.0f), Vector3f(0.0f, 0.0f, 0.0f));
+            frame.draw_box(Vector3f(0.2f, 1.0f, 1.0f),
+                           Vector3f(0.0f, 0.0f, 5.0f),
+                           Quaternionf(Eigen::AngleAxisf(0.5f, Vector3f(1.0f, 1.0f, 1.0f))),
                            Material().with_color(Color(1.0, 0.0, 0.0)));
         });
     }
