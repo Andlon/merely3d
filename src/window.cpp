@@ -329,6 +329,8 @@ namespace merely3d
         // This is apparently needed on Mac OS X. Can we simply set it for all platforms...?
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
+        glfwWindowHint(GLFW_SAMPLES, _samples);
+
         GLFWwindow * glfw_window = glfwCreateWindow(_width, _height, _title.c_str(), NULL, NULL);
 
         if (!glfw_window)

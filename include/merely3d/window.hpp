@@ -96,12 +96,13 @@ namespace merely3d
     public:
         WindowBuilder()
             :   _width(640),
-                _height(480)
+                _height(480),
+                _samples(0)
         {
 
         }
 
-        WindowBuilder dimensions(unsigned int width, unsigned int height)
+        WindowBuilder dimensions(unsigned int width, unsigned int height) const
         {
             auto result = *this;
             result._width = width;
@@ -109,18 +110,26 @@ namespace merely3d
             return result;
         }
 
-        WindowBuilder title(std::string title)
+        WindowBuilder title(std::string title) const
         {
             auto result = *this;
             result._title = std::move(title);
             return result;
         }
 
+        WindowBuilder multisampling(unsigned int samples) const
+        {
+            auto result = *this;
+            result._samples = samples;
+            return result;
+        }
+
         Window build() const;
 
     private:
-        int         _width;
-        int         _height;
-        std::string _title;
+        int             _width;
+        int             _height;
+        unsigned int    _samples;
+        std::string     _title;
     };
 }
