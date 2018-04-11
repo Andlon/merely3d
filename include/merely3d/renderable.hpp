@@ -53,6 +53,11 @@ namespace merely3d
             return result;
         }
 
+        Renderable<Shape> with_position(float x, float y, float z)
+        {
+            return with_position(Eigen::Vector3f(x, y, z));
+        }
+
         template <typename IntoOrientation>
         Renderable<Shape> with_orientation(const IntoOrientation & orientation)
         {
@@ -66,6 +71,11 @@ namespace merely3d
             auto result = *this;
             result.scale = scale;
             return result;
+        }
+
+        Renderable<Shape> with_scale(float x_scale, float y_scale, float z_scale)
+        {
+            return with_scale(Eigen::Vector3f(x_scale, y_scale, z_scale));
         }
 
         Renderable<Shape> with_material(const Material & material)

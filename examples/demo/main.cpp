@@ -20,9 +20,16 @@ using merely3d::Material;
 using merely3d::Color;
 using merely3d::CameraController;
 
+using merely3d::red;
+
+using merely3d::renderable;
+using merely3d::Rectangle;
+using merely3d::Box;
+
 using Eigen::Vector2f;
 using Eigen::Vector3f;
 using Eigen::Quaternionf;
+using Eigen::AngleAxisf;
 
 int main()
 {
@@ -48,20 +55,26 @@ int main()
     {
         window.render_frame([] (Frame & frame)
         {
-            const auto rect_material = Material().with_color(Color(0.5, 0.3, 0.3));
-            Quaternionf orientation = Quaternionf::Identity();
-            orientation = Eigen::AngleAxisf(0.78, Vector3f(1.0f, 0.0f, 0.0f));
-            frame.draw_rectangle(Vector2f(0.5f, 0.5f),
-                                 Vector3f(1.0f, 0.0f, 0.05f),
-                                 orientation,
-                                 rect_material);
-            frame.draw_box(Vector3f(1.0f, 1.0f, 1.0f), Vector3f(4.0f, 0.0f, 0.1f));
+            frame.draw(renderable(Rectangle(0.5, 0.5))
+                        .with_position(1.0, 0.0, 0.5)
+                        .with_orientation(AngleAxisf(0.78, Vector3f(1.0f, 0.0f, 0.0f)))
+                        .with_material(Material().with_color(Color(0.5, 0.3, 0.3))));
 
-            frame.draw_box(Vector3f(0.3f, 5.0f, 3.0f), Vector3f(0.0f, 0.0f, 0.0f));
-            frame.draw_box(Vector3f(0.2f, 1.0f, 1.0f),
-                           Vector3f(0.0f, 0.0f, 5.0f),
-                           Quaternionf(Eigen::AngleAxisf(0.5f, Vector3f(1.0f, 1.0f, 1.0f))),
-                           Material().with_color(Color(1.0, 0.0, 0.0)));
+            frame.draw(renderable(Box(1.0, 1.0, 1.0))
+                        .with_position(4.0, 0.0, 1.1));
+
+            frame.draw(renderable(Box(0.2, 5.0, 1.0))
+                        .with_position(0.0, 0.0, 1.0));
+
+            frame.draw(renderable(Box(0.2, 1.0, 1.0))
+                        .with_position(0.0, 0.0, 5.0)
+                        .with_orientation(AngleAxisf(0.5, Vector3f(1.0, 1.0, 1.0)))
+                        .with_material(Material().with_color(red())));
+
+            const auto floor_color = Color(0.5f, 0.35f, 0.35f);
+            frame.draw(renderable(Rectangle(20.0f, 20.0f))
+                               .with_position(0.0f, 0.0f, 0.0f)
+                               .with_material(Material().with_color(floor_color)));
         });
     }
 
