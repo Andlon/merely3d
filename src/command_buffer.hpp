@@ -21,16 +21,19 @@ namespace merely3d
 
         const std::vector<Renderable<Rectangle>> &  rectangles() const;
         const std::vector<Renderable<Box>> &        boxes() const;
+        const std::vector<Renderable<Sphere>> &     spheres() const;
 
     private:
         std::vector<Renderable<Rectangle>>  _rectangles;
         std::vector<Renderable<Box>>        _boxes;
+        std::vector<Renderable<Sphere>>     _spheres;
     };
 
     inline void CommandBuffer::clear()
     {
         _rectangles.clear();
         _boxes.clear();
+        _spheres.clear();
     }
 
     inline const std::vector<Renderable<Rectangle>> & CommandBuffer::rectangles() const
@@ -41,6 +44,11 @@ namespace merely3d
     inline const std::vector<Renderable<Box>> & CommandBuffer::boxes() const
     {
         return _boxes;
+    }
+
+    inline const std::vector<Renderable<Sphere>> & CommandBuffer::spheres() const
+    {
+        return _spheres;
     }
 
     template<typename Shape>
@@ -59,6 +67,12 @@ namespace merely3d
     inline void CommandBuffer::push_renderable(const Renderable<Rectangle> & renderable)
     {
         _rectangles.push_back(renderable);
+    }
+
+    template <>
+    inline void CommandBuffer::push_renderable(const Renderable<Sphere> &renderable)
+    {
+        _spheres.push_back(renderable);
     }
 }
 

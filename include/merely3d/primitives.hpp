@@ -25,4 +25,12 @@ namespace merely3d
 
         Eigen::Vector3f extents;
     };
+
+    struct Sphere
+    {
+        Sphere() : radius(1.0) {}
+        Sphere(float radius) : radius(radius) {}
+
+        float radius;
+    };
 }

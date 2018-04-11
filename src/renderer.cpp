@@ -1,5 +1,6 @@
 #include "renderer.hpp"
 #include "gl_primitive.hpp"
+#include "mesh_util.hpp"
 
 #include <shaders.hpp>
 
@@ -158,44 +159,19 @@ namespace
         };
     }
 
-    std::vector<unsigned int> unit_cube_indices()
-    {
-        return {
-            // Southern face
-            0, 1, 2,
-            2, 3, 0,
 
-            // Eastern face
-            3, 2, 7,
-            2, 6, 7,
-
-            // Northern face
-            5, 4, 7,
-            7, 6, 5,
-
-            // Western face
-            1, 0, 4,
-            4, 5, 1,
-
-            // Bottom face
-            6, 2, 1,
-            6, 1, 5,
-
-            // Top face
-            0, 3, 7,
-            7, 4, 0
-        };
-    }
 }
 
 namespace merely3d
 {
     Renderer::Renderer(ShaderProgram program,
                        GlPrimitive gl_cube,
-                       GlPrimitive gl_rectangle)
+                       GlPrimitive gl_rectangle,
+                       GlPrimitive gl_sphere)
         : default_program(std::move(program)),
           gl_cube(std::move(gl_cube)),
-          gl_rectangle(std::move(gl_rectangle))
+          gl_rectangle(std::move(gl_rectangle)),
+          gl_sphere(std::move(gl_sphere))
     {
 
     }
@@ -215,9 +191,13 @@ namespace merely3d
         const auto rect_verts = unit_rectangle_vertices_and_normals();
         auto gl_rect = GlPrimitive::create(rect_verts);
 
+        const auto sphere_verts = unit_sphere_vertices_and_normals();
+        auto gl_sphere = GlPrimitive::create(sphere_verts);
+
         return Renderer(std::move(default_program),
                         std::move(gl_cube),
-                        std::move(gl_rect));
+                        std::move(gl_rect),
+                        std::move(gl_sphere));
     }
 
     void Renderer::render(const CommandBuffer & buffer,
@@ -264,10 +244,10 @@ namespace merely3d
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
 
-        gl_rectangle.bind();
-
         default_program.set_vec3_uniform(light_color_loc, light_color_array.data());
         default_program.set_vec3_uniform(light_dir_loc, light_dir.data());
+
+        gl_rectangle.bind();
 
         for (const auto & rectangle : buffer.rectangles())
         {
@@ -283,13 +263,10 @@ namespace merely3d
             default_program.set_mat3_uniform(normal_transform_loc, normal_transform.data());
             default_program.set_vec3_uniform(object_color_loc, obj_color_array.data());
             default_program.set_vec3_uniform(view_pos_loc, camera.position().data());
-            glDrawArrays(GL_TRIANGLES, 0, 36);
+            glDrawArrays(GL_TRIANGLES, 0, gl_rectangle.vertex_count());
         }
 
         gl_cube.bind();
-
-        default_program.set_vec3_uniform(light_color_loc, light_color_array.data());
-        default_program.set_vec3_uniform(light_dir_loc, light_dir.data());
 
         for (const auto & box : buffer.boxes())
         {
@@ -305,7 +282,25 @@ namespace merely3d
             default_program.set_mat3_uniform(normal_transform_loc, normal_transform.data());
             default_program.set_vec3_uniform(object_color_loc, obj_color_array.data());
             default_program.set_vec3_uniform(view_pos_loc, camera.position().data());
-            glDrawArrays(GL_TRIANGLES, 0, 36);
+            glDrawArrays(GL_TRIANGLES, 0, gl_cube.vertex_count());
+        }
+
+        gl_sphere.bind();
+
+        for (const auto & sphere : buffer.spheres())
+        {
+            const auto scaling = Eigen::Scaling(sphere.shape.radius);
+            const Eigen::Affine3f model = Eigen::Translation3f(sphere.position) * sphere.orientation * scaling;
+            const auto normal_transform = Eigen::Matrix3f(model.linear().inverse().transpose());
+
+            const auto obj_color_array = sphere.material.color.into_array();
+            default_program.set_mat4_uniform(projection_loc, projection.data());
+            default_program.set_mat4_uniform(view_loc, view.data());
+            default_program.set_mat4_uniform(model_loc, model.data());
+            default_program.set_mat3_uniform(normal_transform_loc, normal_transform.data());
+            default_program.set_vec3_uniform(object_color_loc, obj_color_array.data());
+            default_program.set_vec3_uniform(view_pos_loc, camera.position().data());
+            glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(gl_sphere.vertex_count()));
         }
 
     }

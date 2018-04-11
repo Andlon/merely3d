@@ -25,6 +25,7 @@ using merely3d::red;
 using merely3d::renderable;
 using merely3d::Rectangle;
 using merely3d::Box;
+using merely3d::Sphere;
 
 using Eigen::Vector2f;
 using Eigen::Vector3f;
@@ -70,6 +71,9 @@ int main()
                         .with_position(0.0, 0.0, 5.0)
                         .with_orientation(AngleAxisf(0.5, Vector3f(1.0, 1.0, 1.0)))
                         .with_material(Material().with_color(red())));
+
+            frame.draw(renderable(Sphere(1.0))
+                        .with_position(3.0, 3.0, 3.0));
 
             const auto floor_color = Color(0.5f, 0.35f, 0.35f);
             frame.draw(renderable(Rectangle(20.0f, 20.0f))

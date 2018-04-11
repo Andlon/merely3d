@@ -48,7 +48,8 @@ set(LIB_FILES
     src/renderer.cpp
     src/event_convert.hpp
     src/gl_primitive.hpp
-    src/app.cpp)
+    src/app.cpp
+    src/mesh_util.hpp)
 
 
 add_library(merely3d ${LIB_FILES} ${LIB_HEADERS})
@@ -60,3 +61,11 @@ target_link_libraries(merely3d glad glfw ${OPENGL_gl_LIBRARY})
 target_link_libraries(merely3d Eigen3::Eigen)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/examples)
+
+set(TEST_FILES
+    test/testmain.cpp
+    test/mesh_utils.cpp)
+
+add_executable(tests ${TEST_FILES})
+target_link_libraries(tests merely3d)
+target_include_directories(tests PRIVATE src extern/catch)

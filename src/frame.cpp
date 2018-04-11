@@ -19,4 +19,10 @@ namespace merely3d
     {
         _buffer->push_renderable(renderable);
     }
+
+    template <>
+    void Frame::draw(const merely3d::Renderable<Sphere> & sphere)
+    {
+        _buffer->push_renderable(sphere);
+    }
 }

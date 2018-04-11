@@ -28,12 +28,16 @@ namespace merely3d
     private:
         Renderer(ShaderProgram program,
                  GlPrimitive gl_cube,
-                 GlPrimitive gl_rectangle);
+                 GlPrimitive gl_rectangle,
+                 GlPrimitive gl_sphere);
 
         ShaderProgram default_program;
 
         GlPrimitive gl_rectangle;
         GlPrimitive gl_cube;
+        GlPrimitive gl_sphere;
+
+        size_t num_sphere_vertices;
     };
 
 }

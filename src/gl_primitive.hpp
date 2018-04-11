@@ -13,10 +13,11 @@ namespace merely3d
     {
     public:
         GlPrimitive(GlPrimitive && other)
-            :   vao(other.vao), vbo(other.vbo)
+            :   vao(other.vao), vbo(other.vbo), num_vertices(other.num_vertices)
         {
             other.vao = 0;
             other.vbo = 0;
+            other.num_vertices = 0;
         }
 
         GlPrimitive(const GlPrimitive & other) = delete;
@@ -38,18 +39,29 @@ namespace merely3d
         /// Unbinds the associated buffers of this primitive.
         void unbind();
 
+        size_t vertex_count() const
+        {
+            return num_vertices;
+        }
+
     private:
-        GlPrimitive(GLuint vao, GLuint vbo)
-            : vao(vao), vbo(vbo)
+        GlPrimitive(GLuint vao, GLuint vbo, size_t num_vertices)
+            : vao(vao), vbo(vbo), num_vertices(num_vertices)
         {}
 
         GLuint vao;
         GLuint vbo;
+
+        size_t num_vertices;
     };
 
     inline GlPrimitive GlPrimitive::create(const std::vector<float> & vertices_and_normals)
     {
         const auto num_v = vertices_and_normals.size();
+
+        // Should be triangles of 3 vertices, each 3 floats
+        assert(num_v % 9 == 0);
+
         const auto & v = vertices_and_normals.data();
         GLuint vao, vbo;
         glGenVertexArrays(1, &vao);
@@ -67,7 +79,7 @@ namespace merely3d
 
         glBindVertexArray(0);
 
-        return GlPrimitive(vao, vbo);
+        return GlPrimitive(vao, vbo, num_v / 3);
     }
 
     inline void GlPrimitive::bind()

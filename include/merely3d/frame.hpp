@@ -31,10 +31,13 @@ namespace merely3d
     };
 
     template <>
-    void Frame::draw(const merely3d::Renderable<Box> &renderable);
+    void Frame::draw(const merely3d::Renderable<Box> & renderable);
 
     template <>
-    void Frame::draw(const merely3d::Renderable<Rectangle> &rectangle);
+    void Frame::draw(const merely3d::Renderable<Rectangle> & rectangle);
+
+    template <>
+    void Frame::draw(const merely3d::Renderable<Sphere> & sphere);
 
     template <typename Shape>
     void Frame::draw(const merely3d::Renderable<Shape> &renderable)
