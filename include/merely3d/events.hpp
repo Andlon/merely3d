@@ -137,6 +137,16 @@ namespace merely3d
         Menu
     };
 
+    /// Bitflags used to determine which modifiers are active during
+    /// a key/mouse button press.
+    enum Modifier
+    {
+        Shift = 0x0001,
+        Control = 0x0002,
+        Alt = 0x0004,
+        Super = 0x0008
+    };
+
     // TODO: This is not just for keys, also for mouse buttons, so rename to reflect!
     enum class Action
     {

@@ -24,4 +24,19 @@ namespace merely3d
         float _g;
         float _b;
     };
+
+    inline Color red()
+    {
+        return { 1.0f, 0.0f, 0.0f };
+    }
+
+    inline Color green()
+    {
+        return { 0.0f, 1.0f, 0.0f };
+    }
+
+    inline Color blue()
+    {
+        return { 0.0f, 0.0f, 1.0f };
+    }
 }
