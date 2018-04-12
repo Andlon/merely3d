@@ -94,6 +94,86 @@ namespace merely3d
         return result;
     }
 
+    /// Returns the vertices of the unit rectangle,
+    /// defined to lie in the xy-plane (z = 0),
+    /// centered at (0, 0, 0) and with unit length sides.
+    std::vector<float> unit_rectangle_vertices_and_normals()
+    {
+        // We render both faces with opposite normals
+        return {
+             // Front
+             0.5, -0.5, 0.0, 0.0, 0.0, 1.0,
+             0.5,  0.5, 0.0, 0.0, 0.0, 1.0,
+            -0.5,  0.5, 0.0, 0.0, 0.0, 1.0,
+            -0.5,  0.5, 0.0, 0.0, 0.0, 1.0,
+            -0.5, -0.5, 0.0, 0.0, 0.0, 1.0,
+             0.5, -0.5, 0.0, 0.0, 0.0, 1.0,
+
+             // Back
+            -0.5,  0.5, 0.0, 0.0, 0.0, -1.0,
+             0.5,  0.5, 0.0, 0.0, 0.0, -1.0,
+             0.5, -0.5, 0.0, 0.0, 0.0, -1.0,
+             0.5, -0.5, 0.0, 0.0, 0.0, -1.0,
+            -0.5, -0.5, 0.0, 0.0, 0.0, -1.0,
+            -0.5,  0.5, 0.0, 0.0, 0.0, -1.0,
+        };
+    }
+
+    /// Returns the vertices and normals of the unit rectangle,
+    /// defined to lie in the xy-plane (z = 0),
+    /// centered at (0, 0, 0) and with unit length sides.
+    ///
+    /// The data is organized follows:
+    /// { v1_x, v1_y, v1_z, n1_x, n1_y, n1_z, v2_x, ... }
+    /// where v1 is vertex 1, n1 is the normal of vertex 1 and so on.
+    std::vector<float> unit_cube_vertices_and_normals()
+    {
+        // vertices and normals courtesy of learnopengl.com
+        return {
+             0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+             0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+             0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+
+            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+             0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+
+            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+
+             0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+             0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+             0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+             0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+             0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+             0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+
+            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+             0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+             0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+             0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+
+             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+             0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f
+        };
+    }
+
     std::vector<float> unit_icosahedron_vertices()
     {
         // The vertex coordinates are given by the cyclic permutations of (0, +-1, +- phi)
