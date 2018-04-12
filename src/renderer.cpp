@@ -7,6 +7,9 @@
 using Eigen::Quaternionf;
 using Eigen::Vector3f;
 using Eigen::Affine3f;
+using Eigen::Matrix3f;
+using Eigen::Translation3f;
+using Eigen::Scaling;
 
 namespace
 {
@@ -44,6 +47,21 @@ namespace
 
 namespace merely3d
 {
+    /// Computes the model matrix for a renderable
+    /// and a transform which transforms the reference
+    /// shape into the given shape in its local coordinate system
+    /// (for example, transform the unit cube into an axis-aligned box)
+    template <typename Shape, typename Transform>
+    static Eigen::Affine3f model_transform_from_reference(
+        const Renderable<Shape> & renderable,
+        const Transform & reference_transform)
+    {
+        return Translation3f(renderable.position)
+               * renderable.orientation
+               * Scaling(renderable.scale)
+               * reference_transform;
+    }
+
     Renderer::Renderer(ShaderProgram default_program,
                        ShaderProgram basic_shader_program,
                        GlPrimitive gl_cube,
@@ -147,63 +165,48 @@ namespace merely3d
         default_program.set_vec3_uniform(light_color_loc, light_color_array.data());
         default_program.set_vec3_uniform(light_dir_loc, light_dir.data());
 
-        gl_rectangle.bind();
-
-        for (const auto & rectangle : buffer.rectangles())
+        auto draw_primitive = [&] (const GlPrimitive & primitive,
+                                   const Affine3f & model,
+                                   const Material & material)
         {
-            // TODO: Additional scaling from renderable!!
-            const auto & extents = rectangle.shape.extents;
-            const auto scaling = Eigen::DiagonalMatrix<float, 3>(extents.x(), extents.y(), 1.0);
-            const Eigen::Affine3f model = Eigen::Translation3f(rectangle.position) *  rectangle.orientation * scaling;
-            const auto normal_transform = Eigen::Matrix3f(model.linear().inverse().transpose());
-
-            const auto obj_color_array = rectangle.material.color.into_array();
+            const auto normal_transform = Matrix3f(model.linear().inverse().transpose());
+            const auto obj_color_array = material.color.into_array();
             default_program.set_mat4_uniform(projection_loc, projection.data());
             default_program.set_mat4_uniform(view_loc, view.data());
             default_program.set_mat4_uniform(model_loc, model.data());
             default_program.set_mat3_uniform(normal_transform_loc, normal_transform.data());
             default_program.set_vec3_uniform(object_color_loc, obj_color_array.data());
             default_program.set_vec3_uniform(view_pos_loc, camera.position().data());
-            glDrawArrays(GL_TRIANGLES, 0, gl_rectangle.vertex_count());
+            glDrawArrays(GL_TRIANGLES, 0, primitive.vertex_count());
+        };
+
+        gl_rectangle.bind();
+
+        for (const auto & rectangle : buffer.rectangles())
+        {
+            const auto & extents = rectangle.shape.extents;
+            const auto reference_transform = Scaling(extents.x(), extents.y(), 1.0f);
+            const auto model = model_transform_from_reference(rectangle, reference_transform);
+            draw_primitive(gl_rectangle, model, rectangle.material);
         }
 
         gl_cube.bind();
 
         for (const auto & box : buffer.boxes())
         {
-            // TODO: Additional scaling from renderable!!
             const auto & extents = box.shape.extents;
-            const auto scaling = Eigen::DiagonalMatrix<float, 3>(extents);
-            const Eigen::Affine3f model = Eigen::Translation3f(box.position) * box.orientation * scaling;
-            const auto normal_transform = Eigen::Matrix3f(model.linear().inverse().transpose());
-
-            const auto obj_color_array = box.material.color.into_array();
-            default_program.set_mat4_uniform(projection_loc, projection.data());
-            default_program.set_mat4_uniform(view_loc, view.data());
-            default_program.set_mat4_uniform(model_loc, model.data());
-            default_program.set_mat3_uniform(normal_transform_loc, normal_transform.data());
-            default_program.set_vec3_uniform(object_color_loc, obj_color_array.data());
-            default_program.set_vec3_uniform(view_pos_loc, camera.position().data());
-            glDrawArrays(GL_TRIANGLES, 0, gl_cube.vertex_count());
+            const auto reference_transform = Scaling(extents);
+            const auto model = model_transform_from_reference(box, reference_transform);
+            draw_primitive(gl_cube, model, box.material);
         }
 
         gl_sphere.bind();
 
         for (const auto & sphere : buffer.spheres())
         {
-            // TODO: Additional scaling from renderable!!
-            const auto scaling = Eigen::Scaling(sphere.shape.radius);
-            const Eigen::Affine3f model = Eigen::Translation3f(sphere.position) * sphere.orientation * scaling;
-            const auto normal_transform = Eigen::Matrix3f(model.linear().inverse().transpose());
-
-            const auto obj_color_array = sphere.material.color.into_array();
-            default_program.set_mat4_uniform(projection_loc, projection.data());
-            default_program.set_mat4_uniform(view_loc, view.data());
-            default_program.set_mat4_uniform(model_loc, model.data());
-            default_program.set_mat3_uniform(normal_transform_loc, normal_transform.data());
-            default_program.set_vec3_uniform(object_color_loc, obj_color_array.data());
-            default_program.set_vec3_uniform(view_pos_loc, camera.position().data());
-            glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(gl_sphere.vertex_count()));
+            const auto reference_transform = Eigen::Scaling(sphere.shape.radius);
+            const auto model = model_transform_from_reference(sphere, reference_transform);
+            draw_primitive(gl_sphere, model, sphere.material);
         }
 
         gl_line.bind();
