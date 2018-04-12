@@ -16,6 +16,8 @@ out vec4 FragColor;
 
 void main()
 {
+    vec3 normal = normalize(normal_world);
+
     // TODO: Make ambient/specular etc. configurable
     float ambient_strength = 0.1;
     float specular_strength = 0.5;
@@ -24,12 +26,12 @@ void main()
     vec3 ambient = ambient_strength * light_color;
 
     // Diffuse
-    float diff = max(- dot(normal_world, light_dir), 0.0);
+    float diff = max(- dot(normal, light_dir), 0.0);
     vec3 diffuse = diff * light_color;
 
     // Specular
     vec3 view_dir = normalize(frag_pos_world - view_pos);
-    vec3 reflect_dir = reflect(light_dir, normal_world);
+    vec3 reflect_dir = reflect(light_dir, normal);
     float spec = pow(max(- dot(view_dir, reflect_dir), 0.0), 32);
     vec3 specular = specular_strength * spec * light_color;
 
