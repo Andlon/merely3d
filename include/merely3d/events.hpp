@@ -1,5 +1,7 @@
 #pragma once
 
+#include <merely3d/unused.hpp>
+
 namespace merely3d
 {
     class Window;
@@ -171,6 +173,11 @@ namespace merely3d
                                int scancode,
                                int modifiers)
         {
+            MERELY_UNUSED(window);
+            MERELY_UNUSED(key);
+            MERELY_UNUSED(action);
+            MERELY_UNUSED(scancode);
+            MERELY_UNUSED(modifiers);
             return false;
         }
 
@@ -179,30 +186,57 @@ namespace merely3d
                                         Action action,
                                         int modifiers)
         {
+            MERELY_UNUSED(window);
+            MERELY_UNUSED(button);
+            MERELY_UNUSED(action);
+            MERELY_UNUSED(modifiers);
             return false;
         }
 
         virtual bool mouse_move(Window & window, double xpos, double ypos)
         {
+            MERELY_UNUSED(window);
+            MERELY_UNUSED(xpos);
+            MERELY_UNUSED(ypos);
             return false;
         }
 
-        virtual void mouse_enter(Window & window) { }
+        virtual void mouse_enter(Window & window)
+        {
+            MERELY_UNUSED(window);
+        }
 
-        virtual void mouse_leave(Window & window) { }
+        virtual void mouse_leave(Window & window)
+        {
+            MERELY_UNUSED(window);
+        }
 
         virtual bool scroll(Window & window, double xoffset, double yoffset)
         {
+            MERELY_UNUSED(window);
+            MERELY_UNUSED(xoffset);
+            MERELY_UNUSED(yoffset);
             return false;
         }
 
         virtual bool character_input(Window & window,
                                      unsigned int codepoint)
         {
+            MERELY_UNUSED(window);
+            MERELY_UNUSED(codepoint);
             return false;
         }
 
-        virtual void before_frame(Window & window, double time_since_previous_frame_begin) {}
-        virtual void after_frame(Window & window, double frame_duration) {}
+        virtual void before_frame(Window & window, double time_since_previous_frame_begin)
+        {
+            MERELY_UNUSED(window);
+            MERELY_UNUSED(time_since_previous_frame_begin);
+        }
+
+        virtual void after_frame(Window & window, double frame_duration)
+        {
+            MERELY_UNUSED(window);
+            MERELY_UNUSED(frame_duration);
+        }
     };
 }

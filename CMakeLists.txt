@@ -52,6 +52,9 @@ set(LIB_FILES
     src/mesh_util.hpp
     src/gl_line.hpp)
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
+    add_compile_options(-Werror -Wall -Wextra)
+endif()
 
 add_library(merely3d ${LIB_FILES} ${LIB_HEADERS})
 target_link_libraries(merely3d Eigen3::Eigen)

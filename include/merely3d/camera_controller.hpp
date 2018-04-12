@@ -14,7 +14,7 @@ namespace merely3d
     {
     public:
         CameraLookMouseController()
-                : xpos(0.0), ypos(0.0), enabled(false), xsens(1.0), ysens(1.0)
+                : xpos(0.0), ypos(0.0), xsens(1.0), ysens(1.0), enabled(false)
         { }
 
         float horizontal_look_sensitivity() const
@@ -37,7 +37,10 @@ namespace merely3d
             ysens = sens;
         }
 
-        bool mouse_button_press(Window &window, merely3d::MouseButton button, Action action, int modifiers) override
+        bool mouse_button_press(Window &window,
+                                MouseButton button,
+                                Action action,
+                                int) override
         {
             using merely3d::MouseButton;
 
@@ -51,7 +54,7 @@ namespace merely3d
             return false;
         }
 
-        bool mouse_move(Window &window, double xpos, double ypos) override
+        bool mouse_move(Window &, double xpos, double ypos) override
         {
             bool accept_event = false;
 
@@ -73,7 +76,7 @@ namespace merely3d
             enable(window, false);
         }
 
-        void before_frame(Window &window, double time_since_previous_frame_begin) override
+        void before_frame(Window &window, double) override
         {
             using Eigen::Quaternionf;
             using Eigen::AngleAxisf;
@@ -154,11 +157,11 @@ namespace merely3d
             _angular_velocity = velocity;
         }
 
-        virtual bool key_press(Window & window,
+        virtual bool key_press(Window &,
                                Key key,
                                Action action,
-                               int scancode,
-                               int modifiers) override
+                               int,
+                               int) override
         {
             const auto look_enabled = action == Action::Press || action == Action::Repeat;
 
@@ -181,8 +184,7 @@ namespace merely3d
             auto & camera = window.camera();
 
             const auto dt = std::max(0.25, time_since_prev);
-
-            const auto rot_angle = _angular_velocity * time_since_prev;
+            const auto rot_angle = _angular_velocity * dt;
 
             float horizontal_rot = 0.0f;
             float vertical_rot = 0.0f;
@@ -236,15 +238,14 @@ namespace merely3d
             _velocity = velocity;
         }
 
-        virtual bool key_press(Window & window,
+        virtual bool key_press(Window &,
                                Key key,
                                Action action,
-                               int scancode,
-                               int modifiers) override
+                               int,
+                               int) override
         {
             using Eigen::AngleAxisf;
 
-            auto & camera = window.camera();
             const auto strafe_enabled = action == Action::Press || action == Action::Repeat;
 
             switch (key)
@@ -340,7 +341,7 @@ namespace merely3d
 
         float angular_look_velocity() const
         {
-            _look_key.angular_look_velocity();
+            return _look_key.angular_look_velocity();
         }
 
         bool key_press(Window &window, Key key, Action action, int scancode, int modifiers) override {
@@ -380,7 +381,7 @@ namespace merely3d
                    || _strafe.scroll(window, xoffset, yoffset);
         }
 
-        bool character_input(Window &window, unsigned int codepoint) override {
+        bool character_input(Window &, unsigned int) override {
             return false;
         }
 

@@ -70,8 +70,8 @@ namespace merely3d
                        GlLine      gl_line)
         : default_program(std::move(default_program)),
           basic_shader_program(std::move(basic_shader_program)),
-          gl_cube(std::move(gl_cube)),
           gl_rectangle(std::move(gl_rectangle)),
+          gl_cube(std::move(gl_cube)),
           gl_sphere(std::move(gl_sphere)),
           gl_line(std::move(gl_line))
     {

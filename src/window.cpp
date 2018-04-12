@@ -216,6 +216,7 @@ namespace merely3d
 
     void Window::render_frame_impl(Frame & frame)
     {
+        MERELY_UNUSED(frame);
         assert(_d);
 
         auto & vp_width = _d->viewport_size.first;

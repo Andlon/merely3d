@@ -52,7 +52,7 @@ TEST_CASE("Unit sphere has normals equal to vertices", "[unit_sphere]")
     REQUIRE(v.size() % 6 * 3 == 0);
 
     const auto num_triangles = v.size() / 18;
-    for (int t = 0; t < num_triangles; ++t)
+    for (size_t t = 0; t < num_triangles; ++t)
     {
         const auto offset = 18 * t;
         const auto a = Vector3f(v[offset + 0], v[offset + 1], v[offset + 2]);

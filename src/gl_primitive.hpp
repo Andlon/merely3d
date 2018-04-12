@@ -57,8 +57,6 @@ namespace merely3d
 
     inline GlPrimitive GlPrimitive::create(const std::vector<float> & vertices_and_normals)
     {
-        const auto num_v = vertices_and_normals.size();
-
         // Should be triangles of 3 vertices, each 3 floats,
         // plus 3 floats for each vertex corresponding to its normal vector
         assert(vertices_and_normals.size() % 18 == 0);
