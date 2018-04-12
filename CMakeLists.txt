@@ -10,7 +10,7 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/extern/glfw-3.2.1")
 
 find_package(OpenGL REQUIRED)
-find_package(Eigen3 3 REQUIRED NO_MODULE)
+find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
 # Configure GLAD, which handles OpenGL extensions for us
 set(GLAD_FILES
@@ -54,12 +54,15 @@ set(LIB_FILES
 
 
 add_library(merely3d ${LIB_FILES} ${LIB_HEADERS})
-
+target_link_libraries(merely3d Eigen3::Eigen)
+target_link_libraries(merely3d glad glfw ${OPENGL_gl_LIBRARY})
 target_include_directories(merely3d PUBLIC include)
 target_include_directories(merely3d PRIVATE ${CONFIGURED_DIR})
 target_include_directories(merely3d SYSTEM PRIVATE ${OPENGL_INCLUDE_DIR})
-target_link_libraries(merely3d glad glfw ${OPENGL_gl_LIBRARY})
-target_link_libraries(merely3d Eigen3::Eigen)
+
+# Add the following include directories as a means of letting
+# users override the Eigen version detected by find_package
+target_include_directories(merely3d SYSTEM PUBLIC ${EIGEN3_ROOT} ${EIGEN3_ROOT_DIR})
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/examples)
 
