@@ -41,8 +41,6 @@ namespace merely3d
         GlPrimitive gl_cube;
         GlPrimitive gl_sphere;
         GlLine      gl_line;
-
-        size_t num_sphere_vertices;
     };
 
 }
