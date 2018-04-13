@@ -10,7 +10,7 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/extern/glfw-3.2.1")
 
 find_package(OpenGL REQUIRED)
-find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+find_package(Eigen3 3.3 NO_MODULE)
 
 # Configure GLAD, which handles OpenGL extensions for us
 set(GLAD_FILES
@@ -57,11 +57,22 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
 endif()
 
 add_library(merely3d ${LIB_FILES} ${LIB_HEADERS})
-target_link_libraries(merely3d Eigen3::Eigen)
+set_target_properties(merely3d PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+
 target_link_libraries(merely3d glad glfw ${OPENGL_gl_LIBRARY})
 target_include_directories(merely3d PUBLIC include)
 target_include_directories(merely3d PRIVATE ${CONFIGURED_DIR})
 target_include_directories(merely3d SYSTEM PRIVATE ${OPENGL_INCLUDE_DIR})
+
+# This shenanigans is required because when using find_package(Eigen3), there seems
+# to be no proper way to override with a source-only Eigen installation, as the
+# global installed configuration always takes precedence (No, this is not fixed by ${Eigen3_DIR}).
+if (TARGET Eigen3::Eigen)
+	target_link_libraries(merely3d Eigen3::Eigen)
+elseif(DEFINED EIGEN3_ROOT OR DEFINED EIGEN3_ROOT_DIR)
+	message("-- An Eigen installation was not found, but a root directory for Eigen has been configured.\n"
+			"-- Attempting to use an Eigen installation from the given root directory.")
+endif()
 
 # Add the following include directories as a means of letting
 # users override the Eigen version detected by find_package

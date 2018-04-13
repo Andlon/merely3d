@@ -6,7 +6,7 @@
 #include <merely3d/camera.hpp>
 #include <merely3d/events.hpp>
 
-class GLFWwindow;
+struct GLFWwindow;
 
 namespace merely3d
 {
