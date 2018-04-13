@@ -60,8 +60,8 @@ namespace merely3d
 
             if (this->enabled)
             {
-                this->xdelta = xpos - this->xpos;
-                this->ydelta = ypos - this->ypos;
+                this->xdelta += xpos - this->xpos;
+                this->ydelta += ypos - this->ypos;
                 accept_event = true;
             }
 
@@ -183,7 +183,7 @@ namespace merely3d
 
             auto & camera = window.camera();
 
-            const auto dt = std::max(0.25, time_since_prev);
+            const auto dt = std::min(0.25, time_since_prev);
             const auto rot_angle = _angular_velocity * dt;
 
             float horizontal_rot = 0.0f;
