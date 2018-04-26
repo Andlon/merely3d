@@ -158,10 +158,6 @@ namespace merely3d
         // TODO: Make lighting configurable rather than hard-coded
         const Eigen::Vector3f light_dir = Eigen::Vector3f(0.9, 1.2, -0.8).normalized();
 
-        // Face culling is necessary to properly render rectangles from both sides
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-
         default_program.set_vec3_uniform(light_color_loc, light_color_array.data());
         default_program.set_vec3_uniform(light_dir_loc, light_dir.data());
 
@@ -171,16 +167,39 @@ namespace merely3d
         {
             const auto normal_transform = Matrix3f(model.linear().inverse().transpose());
             const auto obj_color_array = material.color.into_array();
-            default_program.set_mat4_uniform(projection_loc, projection.data());
-            default_program.set_mat4_uniform(view_loc, view.data());
-            default_program.set_mat4_uniform(model_loc, model.data());
-            default_program.set_mat3_uniform(normal_transform_loc, normal_transform.data());
-            default_program.set_vec3_uniform(object_color_loc, obj_color_array.data());
-            default_program.set_vec3_uniform(view_pos_loc, camera.position().data());
+
+            // TODO: Rather than calling glPolygonMode on every render,
+            // we should rather sort objects by properties so that we can
+            // minimize state changes
+            if (material.wireframe)
+            {
+                basic_shader_program.use();
+                basic_shader_program.set_mat4_uniform(basic_projection_loc, projection.data());
+                basic_shader_program.set_mat4_uniform(basic_view_loc, view.data());
+                basic_shader_program.set_mat4_uniform(basic_model_loc, model.data());
+                basic_shader_program.set_vec3_uniform(basic_object_color_loc, obj_color_array.data());
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            }
+            else
+            {
+                default_program.use();
+                default_program.set_mat4_uniform(projection_loc, projection.data());
+                default_program.set_mat4_uniform(view_loc, view.data());
+                default_program.set_mat4_uniform(model_loc, model.data());
+                default_program.set_mat3_uniform(normal_transform_loc, normal_transform.data());
+                default_program.set_vec3_uniform(object_color_loc, obj_color_array.data());
+                default_program.set_vec3_uniform(view_pos_loc, camera.position().data());
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            }
+
             glDrawArrays(GL_TRIANGLES, 0, primitive.vertex_count());
         };
 
         gl_rectangle.bind();
+
+        // Face culling is necessary to properly render rectangles from both sides
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
 
         for (const auto & rectangle : buffer.rectangles())
         {
@@ -191,6 +210,7 @@ namespace merely3d
         }
 
         gl_cube.bind();
+        glDisable(GL_CULL_FACE);
 
         for (const auto & box : buffer.boxes())
         {

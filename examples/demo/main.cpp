@@ -76,6 +76,14 @@ int main()
             frame.draw(renderable(Sphere(1.0))
                         .with_position(3.0, 3.0, 3.0));
 
+            frame.draw(renderable(Sphere(1.0))
+                        .with_position(3.0, 3.0, 6.0)
+                        .with_material(Material().with_wireframe(true)));
+
+            frame.draw(renderable(Box(1.0, 2.0, 1.0))
+                        .with_position(-3.0, 3.0, 9.0)
+                        .with_material(Material().with_wireframe(true)));
+
             frame.draw_line(Line(Vector3f(0.0, 0.0, 0.0), Vector3f(10.0, -5.0, 10.0)));
 
             const auto floor_color = Color(0.5f, 0.35f, 0.35f);
