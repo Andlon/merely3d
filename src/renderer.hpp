@@ -10,6 +10,8 @@
 #include "gl_primitive.hpp"
 #include "gl_line.hpp"
 
+#include "triangle_primitive_renderer.hpp"
+
 namespace merely3d
 {
     // TODO: Cleanup of resources
@@ -27,19 +29,19 @@ namespace merely3d
         static Renderer build();
 
     private:
-        Renderer(ShaderProgram default_program,
-                 ShaderProgram basic_program,
-                 GlPrimitive gl_cube,
-                 GlPrimitive gl_rectangle,
-                 GlPrimitive gl_sphere,
-                 GlLine gl_line);
+        Renderer(ShaderProgram && line_program,
+                 TrianglePrimitiveRenderer && primitive_renderer,
+                 GlLine && gl_line)
+            : line_program(std::move(line_program)),
+              primitive_renderer(std::move(primitive_renderer)),
+              gl_line(std::move(gl_line))
+        {}
 
-        ShaderProgram default_program;
-        ShaderProgram basic_shader_program;
 
-        GlPrimitive gl_rectangle;
-        GlPrimitive gl_cube;
-        GlPrimitive gl_sphere;
+        ShaderProgram line_program;
+
+        TrianglePrimitiveRenderer primitive_renderer;
+
         GlLine      gl_line;
     };
 

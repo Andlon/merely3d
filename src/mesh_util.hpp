@@ -21,14 +21,14 @@ namespace merely3d
         {}
     };
 
-    void push_vertex(std::vector<float> & c, const Eigen::Vector3f & v)
+    inline void push_vertex(std::vector<float> & c, const Eigen::Vector3f & v)
     {
         c.push_back(v(0));
         c.push_back(v(1));
         c.push_back(v(2));
     }
 
-    std::vector<float> replicate_vertices(const std::vector<float> & vertices,
+    inline std::vector<float> replicate_vertices(const std::vector<float> & vertices,
                                           const std::vector<int> & indices)
     {
         assert(indices.size() % 3 == 0);
@@ -48,7 +48,7 @@ namespace merely3d
         return result;
     }
 
-    std::vector<float> subdivide(const std::vector<float> & replicated_vertices)
+    inline std::vector<float> subdivide(const std::vector<float> & replicated_vertices)
     {
         assert(replicated_vertices.size() % 9 == 0);
         using Eigen::Vector3f;
@@ -97,7 +97,7 @@ namespace merely3d
     /// Returns the vertices of the unit rectangle,
     /// defined to lie in the xy-plane (z = 0),
     /// centered at (0, 0, 0) and with unit length sides.
-    std::vector<float> unit_rectangle_vertices_and_normals()
+    inline std::vector<float> unit_rectangle_vertices_and_normals()
     {
         // We render both faces with opposite normals
         return {
@@ -126,7 +126,7 @@ namespace merely3d
     /// The data is organized follows:
     /// { v1_x, v1_y, v1_z, n1_x, n1_y, n1_z, v2_x, ... }
     /// where v1 is vertex 1, n1 is the normal of vertex 1 and so on.
-    std::vector<float> unit_cube_vertices_and_normals()
+    inline std::vector<float> unit_cube_vertices_and_normals()
     {
         // vertices and normals courtesy of learnopengl.com
         return {
@@ -174,7 +174,7 @@ namespace merely3d
         };
     }
 
-    std::vector<float> unit_icosahedron_vertices()
+    inline std::vector<float> unit_icosahedron_vertices()
     {
         // The vertex coordinates are given by the cyclic permutations of (0, +-1, +- phi)
         // Here we have used the ordering of the vertices and the triangle indexing
@@ -200,7 +200,7 @@ namespace merely3d
         };
     }
 
-    std::vector<int> unit_icosahedron_indices()
+    inline std::vector<int> unit_icosahedron_indices()
     {
         return {
                 0, 11, 5,
@@ -229,7 +229,7 @@ namespace merely3d
         };
     }
 
-    std::vector<float> unit_sphere_vertices_and_normals(unsigned int num_subdivisions = 4)
+    inline std::vector<float> unit_sphere_vertices_and_normals(unsigned int num_subdivisions = 4)
     {
         using Eigen::Vector3f;
 
