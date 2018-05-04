@@ -26,6 +26,11 @@ namespace merely3d
         const std::vector<Renderable<Sphere>> &     spheres() const;
         const std::vector<Line> &                   lines() const;
 
+        std::vector<Renderable<Rectangle>> &  rectangles();
+        std::vector<Renderable<Box>> &        boxes();
+        std::vector<Renderable<Sphere>> &     spheres();
+        std::vector<Line> &                   lines();
+
     private:
         std::vector<Renderable<Rectangle>>  _rectangles;
         std::vector<Renderable<Box>>        _boxes;
@@ -57,6 +62,25 @@ namespace merely3d
     }
 
     inline const std::vector<Line> & CommandBuffer::lines() const {
+        return _lines;
+    }
+
+    inline std::vector<Renderable<Rectangle>> & CommandBuffer::rectangles()
+    {
+        return _rectangles;
+    }
+
+    inline std::vector<Renderable<Box>> & CommandBuffer::boxes()
+    {
+        return _boxes;
+    }
+
+    inline std::vector<Renderable<Sphere>> & CommandBuffer::spheres()
+    {
+        return _spheres;
+    }
+
+    inline std::vector<Line> & CommandBuffer::lines() {
         return _lines;
     }
 

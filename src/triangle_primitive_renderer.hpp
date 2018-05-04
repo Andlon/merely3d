@@ -15,13 +15,15 @@ namespace merely3d
 class TrianglePrimitiveRenderer
 {
 public:
-    void render(const CommandBuffer & buffer,
+    void render(CommandBuffer & buffer,
                 const Camera & camera,
                 const Eigen::Matrix4f & projection);
 
     static TrianglePrimitiveRenderer build();
 
 private:
+
+    void enable_wireframe_rendering(bool enable);
 
     TrianglePrimitiveRenderer(ShaderProgram && default_program,
                               ShaderProgram && basic_program,

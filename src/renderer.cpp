@@ -61,7 +61,7 @@ namespace merely3d
                         GlLine::create());
     }
 
-    void Renderer::render(const CommandBuffer & buffer,
+    void Renderer::render(CommandBuffer & buffer,
                           const Camera & camera,
                           int viewport_width,
                           int viewport_height)

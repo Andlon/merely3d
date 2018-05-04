@@ -21,7 +21,7 @@ namespace merely3d
         Renderer(const Renderer & other) = delete;
         Renderer(Renderer && other) = default;
 
-        void render(const CommandBuffer & buffer,
+        void render(CommandBuffer & buffer,
                     const Camera & camera,
                     int viewport_width,
                     int viewport_height);

@@ -28,6 +28,15 @@ namespace merely3d
                * reference_transform;
     }
 
+    template <typename It>
+    It partition_wireframe_shapes(It begin, It end)
+    {
+        return std::partition(begin, end, [] (const typename It::value_type & shape)
+        {
+            return shape.material.wireframe;
+        });
+    }
+
     TrianglePrimitiveRenderer TrianglePrimitiveRenderer::build()
     {
         const auto fragment_shader = Shader::compile(ShaderType::Fragment, shaders::default_fragment);
@@ -61,7 +70,7 @@ namespace merely3d
     }
 
     void TrianglePrimitiveRenderer::render(
-                const CommandBuffer & buffer,
+                CommandBuffer & buffer,
                 const Camera & camera,
                 const Eigen::Matrix4f & projection)
     {
@@ -91,38 +100,43 @@ namespace merely3d
         default_program.set_vec3_uniform(light_color_loc, light_color_array.data());
         default_program.set_vec3_uniform(light_dir_loc, light_dir.data());
 
-        auto draw_primitive = [&] (const GlPrimitive & primitive,
-                                   const Affine3f & model,
-                                   const Material & material)
+        auto draw_filled_primitive = [&] (const GlPrimitive & primitive,
+                                          const Affine3f & model,
+                                          const Material & material)
         {
             const auto normal_transform = Matrix3f(model.linear().inverse().transpose());
             const auto obj_color_array = material.color.into_array();
 
-            // TODO: Rather than calling glPolygonMode on every render,
-            // we should rather sort objects by properties so that we can
-            // minimize state changes
-            if (material.wireframe)
-            {
-                basic_shader_program.use();
-                basic_shader_program.set_mat4_uniform(basic_projection_loc, projection.data());
-                basic_shader_program.set_mat4_uniform(basic_view_loc, view.data());
-                basic_shader_program.set_mat4_uniform(basic_model_loc, model.data());
-                basic_shader_program.set_vec3_uniform(basic_object_color_loc, obj_color_array.data());
-                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            }
-            else
-            {
-                default_program.use();
-                default_program.set_mat4_uniform(projection_loc, projection.data());
-                default_program.set_mat4_uniform(view_loc, view.data());
-                default_program.set_mat4_uniform(model_loc, model.data());
-                default_program.set_mat3_uniform(normal_transform_loc, normal_transform.data());
-                default_program.set_vec3_uniform(object_color_loc, obj_color_array.data());
-                default_program.set_vec3_uniform(view_pos_loc, camera.position().data());
-                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            }
-
+            default_program.use();
+            default_program.set_mat4_uniform(projection_loc, projection.data());
+            default_program.set_mat4_uniform(view_loc, view.data());
+            default_program.set_mat4_uniform(model_loc, model.data());
+            default_program.set_mat3_uniform(normal_transform_loc, normal_transform.data());
+            default_program.set_vec3_uniform(object_color_loc, obj_color_array.data());
+            default_program.set_vec3_uniform(view_pos_loc, camera.position().data());
             glDrawArrays(GL_TRIANGLES, 0, primitive.vertex_count());
+        };
+
+        auto draw_wireframe_primitive = [&] (const GlPrimitive & primitive,
+                                             const Affine3f & model,
+                                             const Material & material)
+        {
+            const auto obj_color_array = material.color.into_array();
+
+            basic_shader_program.use();
+            basic_shader_program.set_mat4_uniform(basic_projection_loc, projection.data());
+            basic_shader_program.set_mat4_uniform(basic_view_loc, view.data());
+            basic_shader_program.set_mat4_uniform(basic_model_loc, model.data());
+            basic_shader_program.set_vec3_uniform(basic_object_color_loc, obj_color_array.data());
+            glDrawArrays(GL_TRIANGLES, 0, primitive.vertex_count());
+        };
+
+        auto draw_primitive = [&] (const GlPrimitive & primitive,
+                                             const Affine3f & model,
+                                             const Material & material)
+        {
+            if (material.wireframe) draw_wireframe_primitive(primitive, model, material);
+            else                    draw_filled_primitive(primitive, model, material);
         };
 
         gl_rectangle.bind();
@@ -131,13 +145,35 @@ namespace merely3d
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
 
-        for (const auto & rectangle : buffer.rectangles())
+        auto filled_begin = partition_wireframe_shapes(buffer.rectangles().begin(), buffer.rectangles().end());
+
+        enable_wireframe_rendering(true);
+        for (auto it = buffer.rectangles().begin(); it != filled_begin; ++it)
         {
+            const auto & rectangle = *it;
             const auto & extents = rectangle.shape.extents;
             const auto reference_transform = Scaling(extents.x(), extents.y(), 1.0f);
             const auto model = model_transform_from_reference(rectangle, reference_transform);
-            draw_primitive(gl_rectangle, model, rectangle.material);
+            draw_wireframe_primitive(gl_rectangle, model, rectangle.material);
         }
+
+        enable_wireframe_rendering(false);
+        for (auto it = filled_begin; it != buffer.rectangles().end(); ++it)
+        {
+            const auto & rectangle = *it;
+            const auto & extents = rectangle.shape.extents;
+            const auto reference_transform = Scaling(extents.x(), extents.y(), 1.0f);
+            const auto model = model_transform_from_reference(rectangle, reference_transform);
+            draw_filled_primitive(gl_rectangle, model, rectangle.material);
+        }
+//
+//        for (const auto & rectangle : buffer.rectangles())
+//        {
+//            const auto & extents = rectangle.shape.extents;
+//            const auto reference_transform = Scaling(extents.x(), extents.y(), 1.0f);
+//            const auto model = model_transform_from_reference(rectangle, reference_transform);
+//            draw_primitive(gl_rectangle, model, rectangle.material);
+//        }
 
         gl_cube.bind();
         glDisable(GL_CULL_FACE);
@@ -157,6 +193,18 @@ namespace merely3d
             const auto reference_transform = Eigen::Scaling(sphere.shape.radius);
             const auto model = model_transform_from_reference(sphere, reference_transform);
             draw_primitive(gl_sphere, model, sphere.material);
+        }
+    }
+
+    void TrianglePrimitiveRenderer::enable_wireframe_rendering(bool enable)
+    {
+        if (enable)
+        {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
+        else
+        {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
     }
 }
