@@ -9,6 +9,7 @@
 #include "command_buffer.hpp"
 #include "gl_primitive.hpp"
 #include "gl_line.hpp"
+#include "shader_collection.hpp"
 
 #include "triangle_primitive_renderer.hpp"
 
@@ -29,19 +30,16 @@ namespace merely3d
         static Renderer build();
 
     private:
-        Renderer(ShaderProgram && line_program,
+        Renderer(ShaderCollection && shader_collection,
                  TrianglePrimitiveRenderer && primitive_renderer,
                  GlLine && gl_line)
-            : line_program(std::move(line_program)),
+            : shader_collection(std::move(shader_collection)),
               primitive_renderer(std::move(primitive_renderer)),
               gl_line(std::move(gl_line))
         {}
 
-
-        ShaderProgram line_program;
-
+        ShaderCollection shader_collection;
         TrianglePrimitiveRenderer primitive_renderer;
-
         GlLine      gl_line;
     };
 

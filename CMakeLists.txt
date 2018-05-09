@@ -52,7 +52,9 @@ set(LIB_FILES
     src/mesh_util.hpp
     src/gl_line.hpp
     src/triangle_primitive_renderer.hpp
-    src/triangle_primitive_renderer.cpp)
+    src/triangle_primitive_renderer.cpp
+    src/shader_collection.hpp
+    src/shader_collection.cpp)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
     add_compile_options(-Werror -Wall -Wextra)

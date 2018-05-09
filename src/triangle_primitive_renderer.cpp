@@ -39,20 +39,6 @@ namespace merely3d
 
     TrianglePrimitiveRenderer TrianglePrimitiveRenderer::build()
     {
-        const auto fragment_shader = Shader::compile(ShaderType::Fragment, shaders::default_fragment);
-        const auto vertex_shader = Shader::compile(ShaderType::Vertex, shaders::default_vertex);
-        auto default_program = ShaderProgram::create();
-        default_program.attach(fragment_shader);
-        default_program.attach(vertex_shader);
-        default_program.link();
-
-        const auto basic_fragment_shader = Shader::compile(ShaderType::Fragment, shaders::basic_fragment);
-        const auto basic_vertex_shader = Shader::compile(ShaderType::Vertex, shaders::basic_vertex);
-        auto basic_program = ShaderProgram::create();
-        basic_program.attach(basic_fragment_shader);
-        basic_program.attach(basic_vertex_shader);
-        basic_program.link();
-
         const auto cube_verts = unit_cube_vertices_and_normals();
         auto gl_cube = GlPrimitive::create(cube_verts);
 
@@ -62,58 +48,45 @@ namespace merely3d
         const auto sphere_verts = unit_sphere_vertices_and_normals();
         auto gl_sphere = GlPrimitive::create(sphere_verts);
 
-        return TrianglePrimitiveRenderer(std::move(default_program),
-                                         std::move(basic_program),
-                                         std::move(gl_cube),
+        return TrianglePrimitiveRenderer(std::move(gl_cube),
                                          std::move(gl_rect),
                                          std::move(gl_sphere));
     }
 
     void TrianglePrimitiveRenderer::render(
+                ShaderCollection & shaders,
                 CommandBuffer & buffer,
                 const Camera & camera,
                 const Eigen::Matrix4f & projection)
     {
-        default_program.use();
-
-        const auto projection_loc = default_program.get_uniform_loc("projection");
-        const auto model_loc = default_program.get_uniform_loc("model");
-        const auto view_loc = default_program.get_uniform_loc("view");
-        const auto object_color_loc = default_program.get_uniform_loc("object_color");
-        const auto light_color_loc = default_program.get_uniform_loc("light_color");
-        const auto light_dir_loc = default_program.get_uniform_loc("light_dir");
-        const auto normal_transform_loc = default_program.get_uniform_loc("normal_transform");
-        const auto view_pos_loc = default_program.get_uniform_loc("view_pos");
-
-        const auto basic_projection_loc = basic_shader_program.get_uniform_loc("projection");
-        const auto basic_model_loc = basic_shader_program.get_uniform_loc("model");
-        const auto basic_view_loc = basic_shader_program.get_uniform_loc("view");
-        const auto basic_object_color_loc = basic_shader_program.get_uniform_loc("object_color");
+        auto & mesh_shader = shaders.mesh_shader();
+        auto & line_shader = shaders.line_shader();
 
         const Eigen::Affine3f view = camera.transform().inverse();
 
         // TODO: Make lighting configurable rather than hard-coded
         const auto light_color = Color(1.0, 1.0, 1.0);
-        const auto light_color_array = light_color.into_array();
         const Eigen::Vector3f light_dir = Eigen::Vector3f(0.9, 1.2, -0.8).normalized();
 
-        default_program.set_vec3_uniform(light_color_loc, light_color_array.data());
-        default_program.set_vec3_uniform(light_dir_loc, light_dir.data());
+        mesh_shader.use();
 
         auto draw_filled_primitive = [&] (const GlPrimitive & primitive,
                                           const Affine3f & model,
                                           const Material & material)
         {
             const auto normal_transform = Matrix3f(model.linear().inverse().transpose());
-            const auto obj_color_array = material.color.into_array();
 
-            default_program.use();
-            default_program.set_mat4_uniform(projection_loc, projection.data());
-            default_program.set_mat4_uniform(view_loc, view.data());
-            default_program.set_mat4_uniform(model_loc, model.data());
-            default_program.set_mat3_uniform(normal_transform_loc, normal_transform.data());
-            default_program.set_vec3_uniform(object_color_loc, obj_color_array.data());
-            default_program.set_vec3_uniform(view_pos_loc, camera.position().data());
+            mesh_shader.use();
+            // TODO: Move light/camera/projection/view etc. out of
+            // inner rendering loop
+            mesh_shader.set_light_color(light_color);
+            mesh_shader.set_light_direction(light_dir);
+            mesh_shader.set_view_transform(view);
+            mesh_shader.set_projection_transform(projection);
+            mesh_shader.set_model_transform(model);
+            mesh_shader.set_normal_transform(normal_transform);
+            mesh_shader.set_object_color(material.color);
+            mesh_shader.set_camera_position(camera.position());
             glDrawArrays(GL_TRIANGLES, 0, primitive.vertex_count());
         };
 
@@ -121,13 +94,13 @@ namespace merely3d
                                              const Affine3f & model,
                                              const Material & material)
         {
-            const auto obj_color_array = material.color.into_array();
-
-            basic_shader_program.use();
-            basic_shader_program.set_mat4_uniform(basic_projection_loc, projection.data());
-            basic_shader_program.set_mat4_uniform(basic_view_loc, view.data());
-            basic_shader_program.set_mat4_uniform(basic_model_loc, model.data());
-            basic_shader_program.set_vec3_uniform(basic_object_color_loc, obj_color_array.data());
+            line_shader.use();
+            // TODO: Move projection/view transforms out of individual
+            // object rendering
+            line_shader.set_projection_transform(projection);
+            line_shader.set_view_transform(view);
+            line_shader.set_model_transform(model);
+            line_shader.set_object_color(material.color);
             glDrawArrays(GL_TRIANGLES, 0, primitive.vertex_count());
         };
 
@@ -147,6 +120,7 @@ namespace merely3d
 
         auto filled_begin = partition_wireframe_shapes(buffer.rectangles().begin(), buffer.rectangles().end());
 
+        line_shader.use();
         enable_wireframe_rendering(true);
         for (auto it = buffer.rectangles().begin(); it != filled_begin; ++it)
         {
@@ -157,6 +131,7 @@ namespace merely3d
             draw_wireframe_primitive(gl_rectangle, model, rectangle.material);
         }
 
+        mesh_shader.use();
         enable_wireframe_rendering(false);
         for (auto it = filled_begin; it != buffer.rectangles().end(); ++it)
         {
@@ -166,14 +141,6 @@ namespace merely3d
             const auto model = model_transform_from_reference(rectangle, reference_transform);
             draw_filled_primitive(gl_rectangle, model, rectangle.material);
         }
-//
-//        for (const auto & rectangle : buffer.rectangles())
-//        {
-//            const auto & extents = rectangle.shape.extents;
-//            const auto reference_transform = Scaling(extents.x(), extents.y(), 1.0f);
-//            const auto model = model_transform_from_reference(rectangle, reference_transform);
-//            draw_primitive(gl_rectangle, model, rectangle.material);
-//        }
 
         gl_cube.bind();
         glDisable(GL_CULL_FACE);

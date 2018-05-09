@@ -49,14 +49,7 @@ namespace merely3d
 {
     Renderer Renderer::build()
     {
-        const auto basic_fragment_shader = Shader::compile(ShaderType::Fragment, shaders::basic_fragment);
-        const auto basic_vertex_shader = Shader::compile(ShaderType::Vertex, shaders::basic_vertex);
-        auto line_program = ShaderProgram::create();
-        line_program.attach(basic_fragment_shader);
-        line_program.attach(basic_vertex_shader);
-        line_program.link();
-
-        return Renderer(std::move(line_program),
+        return Renderer(ShaderCollection::create_in_context(),
                         TrianglePrimitiveRenderer::build(),
                         GlLine::create());
     }
@@ -71,11 +64,6 @@ namespace merely3d
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        const auto basic_projection_loc = line_program.get_uniform_loc("projection");
-        const auto basic_model_loc = line_program.get_uniform_loc("model");
-        const auto basic_view_loc = line_program.get_uniform_loc("view");
-        const auto basic_object_color_loc = line_program.get_uniform_loc("object_color");
-
         // TODO: Move aspect ratio computation to separate function
         const auto width = static_cast<float>(viewport_width);
         const auto height = static_cast<float>(viewport_height);
@@ -86,13 +74,15 @@ namespace merely3d
                                   : 1.0;
         const auto projection = projection_matrix(camera.fovy(), aspect_ratio, 0.1);
 
-        primitive_renderer.render(buffer, camera, projection);
+        primitive_renderer.render(shader_collection, buffer, camera, projection);
 
         // TODO: Create a LineRenderer class or similar to encapsulate
         // line rendering
         gl_line.bind();
 
-        line_program.use();
+        auto & line_shader = shader_collection.line_shader();
+
+        line_shader.use();
 
         const Affine3f view = camera.transform().inverse();
 
@@ -107,12 +97,10 @@ namespace merely3d
             const Quaternionf rotation = Quaternionf::FromTwoVectors(e1, c);
             const Eigen::Affine3f model = Eigen::Translation3f(line.from) * rotation * Eigen::Scaling(c.norm());
 
-            const auto obj_color_array = line.color.into_array();
-
-            line_program.set_mat4_uniform(basic_projection_loc, projection.data());
-            line_program.set_mat4_uniform(basic_view_loc, view.data());
-            line_program.set_mat4_uniform(basic_model_loc, model.data());
-            line_program.set_vec3_uniform(basic_object_color_loc, obj_color_array.data());
+            line_shader.set_projection_transform(projection);
+            line_shader.set_view_transform(view);
+            line_shader.set_model_transform(model);
+            line_shader.set_object_color(line.color);
             glDrawArrays(GL_LINES, 0, 2);
         }
 
