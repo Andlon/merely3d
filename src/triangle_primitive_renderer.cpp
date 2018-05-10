@@ -35,15 +35,6 @@ namespace merely3d
         }
     }
 
-    template <typename It>
-    It partition_wireframe_shapes(It begin, It end)
-    {
-        return std::partition(begin, end, [] (const typename It::value_type & shape)
-        {
-            return shape.material.wireframe;
-        });
-    }
-
     /// Render primitives.
     ///
     /// NB! Assumes that the uniforms not specific
