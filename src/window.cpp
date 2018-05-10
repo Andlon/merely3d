@@ -231,8 +231,6 @@ namespace merely3d
         end_frame();
 
         glfwSwapBuffers(_d->glfw_window.get());
-
-        poll_events();
     }
 
     bool Window::should_close() const

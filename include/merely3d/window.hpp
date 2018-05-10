@@ -43,6 +43,7 @@ namespace merely3d
         void render_frame(RenderFunc && render_func)
         {
             make_current();
+            poll_events();
             begin_frame();
             auto buffer = get_command_buffer();
             Frame frame(buffer);
