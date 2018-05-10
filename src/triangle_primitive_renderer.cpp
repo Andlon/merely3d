@@ -81,10 +81,11 @@ namespace merely3d
 
         // Partition vector so that renderables that are to be rendered as wireframes
         // come first
-        auto filled_begin = std::partition(begin, end, [] (const Renderable<Shape> & renderable)
-        {
-            return renderable.material.wireframe;
-        });
+        auto filled_begin = std::partition(renderables.begin(), renderables.end(),
+            [] (const Renderable<Shape> & renderable)
+            {
+                return renderable.material.wireframe;
+            });
 
         line_shader.use();
         enable_wireframe_rendering(true);
