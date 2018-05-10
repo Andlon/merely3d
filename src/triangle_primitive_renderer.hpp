@@ -25,8 +25,6 @@ public:
 
 private:
 
-    void enable_wireframe_rendering(bool enable);
-
     TrianglePrimitiveRenderer(GlPrimitive && gl_cube,
                               GlPrimitive && gl_rectangle,
                               GlPrimitive && gl_sphere)

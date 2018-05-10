@@ -5,6 +5,8 @@
 
 #include <Eigen/Dense>
 
+#include <algorithm>
+
 using Eigen::Affine3f;
 using Eigen::Matrix3f;
 using Eigen::Vector3f;
@@ -13,19 +15,24 @@ using Eigen::Translation3f;
 
 namespace merely3d
 {
-    /// Computes the model matrix for a renderable
-    /// and a transform which transforms the reference
-    /// shape into the given shape in its local coordinate system
-    /// (for example, transform the unit cube into an axis-aligned box)
-    template <typename Shape, typename Transform>
-    static Eigen::Affine3f model_transform_from_reference(
-        const Renderable<Shape> & renderable,
-        const Transform & reference_transform)
+    template <typename Shape>
+    Affine3f build_model_transform(const Renderable<Shape> & renderable)
     {
         return Translation3f(renderable.position)
                * renderable.orientation
-               * Scaling(renderable.scale)
-               * reference_transform;
+               * Scaling(renderable.scale);
+    }
+
+    static void enable_wireframe_rendering(bool enable)
+    {
+        if (enable)
+        {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
+        else
+        {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
     }
 
     template <typename It>
@@ -35,6 +42,75 @@ namespace merely3d
         {
             return shape.material.wireframe;
         });
+    }
+
+    /// Render primitives.
+    ///
+    /// NB! Assumes that the uniforms not specific
+    /// to the individual renderable are all correctly set.
+    template <typename ReferenceTransform, typename Shape>
+    void render_primitives(std::vector<Renderable<Shape>> & renderables,
+                           ShaderCollection & shaders,
+                           GlPrimitive & primitive,
+                           ReferenceTransform && reference_transform)
+    {
+        primitive.bind();
+        auto & line_shader = shaders.line_shader();
+        auto & mesh_shader = shaders.mesh_shader();
+
+        auto draw_primitive = [&] (const Renderable<Shape> & renderable)
+        {
+            const auto ref_transform = reference_transform(renderable.shape);
+            const auto model = build_model_transform(renderable) * ref_transform;
+
+            if (renderable.material.wireframe)
+            {
+                line_shader.set_model_transform(model);
+                line_shader.set_object_color(renderable.material.color);
+                glDrawArrays(GL_TRIANGLES, 0, primitive.vertex_count());
+            }
+            else
+            {
+                const auto normal_transform = Matrix3f(model.linear().inverse().transpose());
+                mesh_shader.set_model_transform(model);
+                mesh_shader.set_normal_transform(normal_transform);
+                mesh_shader.set_object_color(renderable.material.color);
+                glDrawArrays(GL_TRIANGLES, 0, primitive.vertex_count());
+            }
+        };
+
+        // Partition vector so that renderables that are to be rendered as wireframes
+        // come first
+        auto filled_begin = std::partition(begin, end, [] (const Renderable<Shape> & renderable)
+        {
+            return renderable.material.wireframe;
+        });
+
+        line_shader.use();
+        enable_wireframe_rendering(true);
+        std::for_each(renderables.begin(), filled_begin, draw_primitive);
+
+        mesh_shader.use();
+        enable_wireframe_rendering(false);
+        std::for_each(filled_begin, renderables.end(), draw_primitive);
+    }
+
+    /// Returns the linear transformation that
+    /// transforms a reference cube into the provided Box.
+    Eigen::AlignedScaling3f box_reference_transform(const Box & box)
+    {
+        return Scaling(box.extents);
+    }
+
+    Eigen::AlignedScaling3f rectangle_reference_transform(const Rectangle & rectangle)
+    {
+        const auto & extents = rectangle.extents;
+        return Scaling(extents.x(), extents.y(), 1.0f);
+    }
+
+    Eigen::UniformScaling<float> sphere_reference_transform(const Sphere & sphere)
+    {
+        return Scaling(sphere.radius);
     }
 
     TrianglePrimitiveRenderer TrianglePrimitiveRenderer::build()
@@ -68,110 +144,25 @@ namespace merely3d
         const auto light_color = Color(1.0, 1.0, 1.0);
         const Eigen::Vector3f light_dir = Eigen::Vector3f(0.9, 1.2, -0.8).normalized();
 
+        // Set up uniforms that are invariant across renderables
         mesh_shader.use();
-
-        auto draw_filled_primitive = [&] (const GlPrimitive & primitive,
-                                          const Affine3f & model,
-                                          const Material & material)
-        {
-            const auto normal_transform = Matrix3f(model.linear().inverse().transpose());
-
-            mesh_shader.use();
-            // TODO: Move light/camera/projection/view etc. out of
-            // inner rendering loop
-            mesh_shader.set_light_color(light_color);
-            mesh_shader.set_light_direction(light_dir);
-            mesh_shader.set_view_transform(view);
-            mesh_shader.set_projection_transform(projection);
-            mesh_shader.set_model_transform(model);
-            mesh_shader.set_normal_transform(normal_transform);
-            mesh_shader.set_object_color(material.color);
-            mesh_shader.set_camera_position(camera.position());
-            glDrawArrays(GL_TRIANGLES, 0, primitive.vertex_count());
-        };
-
-        auto draw_wireframe_primitive = [&] (const GlPrimitive & primitive,
-                                             const Affine3f & model,
-                                             const Material & material)
-        {
-            line_shader.use();
-            // TODO: Move projection/view transforms out of individual
-            // object rendering
-            line_shader.set_projection_transform(projection);
-            line_shader.set_view_transform(view);
-            line_shader.set_model_transform(model);
-            line_shader.set_object_color(material.color);
-            glDrawArrays(GL_TRIANGLES, 0, primitive.vertex_count());
-        };
-
-        auto draw_primitive = [&] (const GlPrimitive & primitive,
-                                             const Affine3f & model,
-                                             const Material & material)
-        {
-            if (material.wireframe) draw_wireframe_primitive(primitive, model, material);
-            else                    draw_filled_primitive(primitive, model, material);
-        };
-
-        gl_rectangle.bind();
+        mesh_shader.set_light_color(light_color);
+        mesh_shader.set_light_direction(light_dir);
+        mesh_shader.set_view_transform(view);
+        mesh_shader.set_projection_transform(projection);
+        mesh_shader.set_camera_position(camera.position());
+        line_shader.use();
+        line_shader.set_projection_transform(projection);
+        line_shader.set_view_transform(view);
 
         // Face culling is necessary to properly render rectangles from both sides
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
+        render_primitives(buffer.rectangles(), shaders, gl_rectangle, rectangle_reference_transform);
 
-        auto filled_begin = partition_wireframe_shapes(buffer.rectangles().begin(), buffer.rectangles().end());
-
-        line_shader.use();
-        enable_wireframe_rendering(true);
-        for (auto it = buffer.rectangles().begin(); it != filled_begin; ++it)
-        {
-            const auto & rectangle = *it;
-            const auto & extents = rectangle.shape.extents;
-            const auto reference_transform = Scaling(extents.x(), extents.y(), 1.0f);
-            const auto model = model_transform_from_reference(rectangle, reference_transform);
-            draw_wireframe_primitive(gl_rectangle, model, rectangle.material);
-        }
-
-        mesh_shader.use();
-        enable_wireframe_rendering(false);
-        for (auto it = filled_begin; it != buffer.rectangles().end(); ++it)
-        {
-            const auto & rectangle = *it;
-            const auto & extents = rectangle.shape.extents;
-            const auto reference_transform = Scaling(extents.x(), extents.y(), 1.0f);
-            const auto model = model_transform_from_reference(rectangle, reference_transform);
-            draw_filled_primitive(gl_rectangle, model, rectangle.material);
-        }
-
-        gl_cube.bind();
+        // But we don't want to cull faces for other objects (for now, at least)
         glDisable(GL_CULL_FACE);
-
-        for (const auto & box : buffer.boxes())
-        {
-            const auto & extents = box.shape.extents;
-            const auto reference_transform = Scaling(extents);
-            const auto model = model_transform_from_reference(box, reference_transform);
-            draw_primitive(gl_cube, model, box.material);
-        }
-
-        gl_sphere.bind();
-
-        for (const auto & sphere : buffer.spheres())
-        {
-            const auto reference_transform = Eigen::Scaling(sphere.shape.radius);
-            const auto model = model_transform_from_reference(sphere, reference_transform);
-            draw_primitive(gl_sphere, model, sphere.material);
-        }
-    }
-
-    void TrianglePrimitiveRenderer::enable_wireframe_rendering(bool enable)
-    {
-        if (enable)
-        {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        }
-        else
-        {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        }
+        render_primitives(buffer.boxes(), shaders, gl_cube, box_reference_transform);
+        render_primitives(buffer.spheres(), shaders, gl_sphere, sphere_reference_transform);
     }
 }
