@@ -311,6 +311,12 @@ namespace merely3d
         }
     }
 
+    Action Window::get_last_key_action(Key key)
+    {
+        const auto glfw_action = glfwGetKey(_d->glfw_window.get(), glfw_key_from_key(key));
+        return action_from_glfw(glfw_action);
+    }
+
     WindowSize Window::size() const
     {
         WindowSize size;

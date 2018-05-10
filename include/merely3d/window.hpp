@@ -72,6 +72,8 @@ namespace merely3d
         /// Returns the size of the windows in screen coordinates (not necessarily pixels).
         WindowSize size() const;
 
+        Action get_last_key_action(Key key);
+
     private:
         friend class WindowBuilder;
         friend void dispatch_key_event(Window *, Key, Action, int, int);
