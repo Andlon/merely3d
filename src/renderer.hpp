@@ -5,9 +5,7 @@
 
 #include <merely3d/camera.hpp>
 
-#include "shader.hpp"
 #include "command_buffer.hpp"
-#include "gl_primitive.hpp"
 #include "gl_line.hpp"
 #include "shader_collection.hpp"
 

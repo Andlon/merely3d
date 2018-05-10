@@ -1,8 +1,6 @@
 #include "triangle_primitive_renderer.hpp"
 #include "mesh_util.hpp"
 
-#include <shaders.hpp>
-
 #include <Eigen/Dense>
 
 #include <algorithm>
@@ -66,6 +64,8 @@ namespace merely3d
                 mesh_shader.set_model_transform(model);
                 mesh_shader.set_normal_transform(normal_transform);
                 mesh_shader.set_object_color(renderable.material.color);
+                mesh_shader.set_reference_transform(Matrix3f(ref_transform));
+                mesh_shader.set_pattern_grid_size(std::max(0.0f, renderable.material.pattern_grid_size));
                 glDrawArrays(GL_TRIANGLES, 0, primitive.vertex_count());
             }
         };
@@ -100,9 +100,10 @@ namespace merely3d
         return Scaling(extents.x(), extents.y(), 1.0f);
     }
 
-    Eigen::UniformScaling<float> sphere_reference_transform(const Sphere & sphere)
+    Eigen::AlignedScaling3f sphere_reference_transform(const Sphere & sphere)
     {
-        return Scaling(sphere.radius);
+        const auto r = sphere.radius;
+        return Scaling(r, r, r);
     }
 
     TrianglePrimitiveRenderer TrianglePrimitiveRenderer::build()

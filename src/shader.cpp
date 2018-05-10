@@ -91,4 +91,9 @@ namespace merely3d
     {
         glUniform3fv(location, 1, value);
     }
+
+    void ShaderProgram::set_float_uniform(GLint location, float value)
+    {
+        glUniform1f(location, value);
+    }
 }

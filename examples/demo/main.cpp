@@ -84,6 +84,14 @@ int main()
                         .with_position(-3.0, 3.0, 9.0)
                         .with_material(Material().with_wireframe(true)));
 
+            frame.draw(renderable(Rectangle(10.0, 2.0))
+                        .with_position(0.0, 0.0, 10.0)
+                        .with_material(Material().with_pattern_grid_size(0.0f)));
+
+            frame.draw(renderable(Rectangle(10.0, 2.0))
+                        .with_position(0.0, 8.0, 10.0)
+                        .with_material(Material().with_wireframe(true)));
+
             frame.draw_line(Line(Vector3f(0.0, 0.0, 0.0), Vector3f(10.0, -5.0, 10.0)));
 
             const auto floor_color = Color(0.5f, 0.35f, 0.35f);

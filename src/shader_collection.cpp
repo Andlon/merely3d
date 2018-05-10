@@ -33,6 +33,11 @@ namespace merely3d
         shader.set_mat3_uniform(normal_transform_loc, transform.data());
     }
 
+    void MeshShader::set_reference_transform(const Eigen::Matrix3f & transform)
+    {
+        shader.set_mat3_uniform(reference_transform_loc, transform.data());
+    }
+
     void MeshShader::set_light_color(const Color & color)
     {
         const auto color_array = color.into_array();
@@ -47,6 +52,16 @@ namespace merely3d
     void MeshShader::set_camera_position(const Eigen::Vector3f & position)
     {
         shader.set_vec3_uniform(camera_pos_loc, position.data());
+    }
+
+    void MeshShader::set_pattern_grid_size(float size)
+    {
+        if (size < 0)
+        {
+            throw std::invalid_argument("Pattern grid size must be non-negative.");
+        }
+
+        shader.set_float_uniform(pattern_grid_size_loc, size);
     }
 
     void MeshShader::set_model_transform(const Eigen::Affine3f & model)
@@ -93,6 +108,8 @@ namespace merely3d
         shader.light_dir_loc = shader.shader.get_uniform_loc("light_dir");
         shader.normal_transform_loc = shader.shader.get_uniform_loc("normal_transform");
         shader.camera_pos_loc = shader.shader.get_uniform_loc("view_pos");
+        shader.reference_transform_loc = shader.shader.get_uniform_loc("reference_transform");
+        shader.pattern_grid_size_loc = shader.shader.get_uniform_loc("pattern_grid_size");
 
         return shader;
     }

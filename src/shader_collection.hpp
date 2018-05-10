@@ -18,10 +18,12 @@ namespace merely3d
         void set_view_transform(const Eigen::Affine3f & view);
         void set_projection_transform(const Eigen::Matrix4f & projection);
         void set_normal_transform(const Eigen::Matrix3f & transform);
+        void set_reference_transform(const Eigen::Matrix3f & transform);
         void set_object_color(const Color & color);
         void set_light_color(const Color & color);
         void set_light_direction(const Eigen::Vector3f & direction);
         void set_camera_position(const Eigen::Vector3f & position);
+        void set_pattern_grid_size(float size);
 
         void use();
 
@@ -40,6 +42,8 @@ namespace merely3d
         GLint light_color_loc;
         GLint light_dir_loc;
         GLint camera_pos_loc;
+        GLint reference_transform_loc;
+        GLint pattern_grid_size_loc;
 
         ShaderProgram shader;
     };

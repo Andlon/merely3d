@@ -1,8 +1,4 @@
 #include "renderer.hpp"
-#include "gl_primitive.hpp"
-#include "mesh_util.hpp"
-
-#include <shaders.hpp>
 
 using Eigen::Quaternionf;
 using Eigen::Vector3f;
