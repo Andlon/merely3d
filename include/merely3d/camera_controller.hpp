@@ -76,7 +76,7 @@ namespace merely3d
             enable(window, false);
         }
 
-        void before_frame(Window &window, double) override
+        void before_frame(Window &window, Frame &) override
         {
             using Eigen::Quaternionf;
             using Eigen::AngleAxisf;
@@ -91,7 +91,7 @@ namespace merely3d
                                           ? static_cast<double>(window_size.width) / static_cast<double>(window_size.height)
                                           : 1.0;
 
-                const auto fovy = camera.fovy();
+                const auto fovy = window.fovy();
                 const auto fovx = 2.0 * atan(tan(fovy / 2.0) * aspect_ratio);
 
                 float horizontal_rot = - xsens * static_cast<float>(xdelta * fovx / window_size.width);
@@ -175,7 +175,7 @@ namespace merely3d
             }
         }
 
-        virtual void before_frame(Window & window, double time_since_prev)
+        virtual void before_frame(Window & window, Frame & frame) override
         {
             using Eigen::Vector3f;
             using Eigen::AngleAxisf;
@@ -183,7 +183,7 @@ namespace merely3d
 
             auto & camera = window.camera();
 
-            const auto dt = std::min(0.25, time_since_prev);
+            const auto dt = std::min(0.25, frame.time_since_prev_frame());
             const auto rot_angle = _angular_velocity * dt;
 
             float horizontal_rot = 0.0f;
@@ -260,12 +260,12 @@ namespace merely3d
             }
         }
 
-        virtual void before_frame(Window & window, double time_since_prev)
+        virtual void before_frame(Window & window, Frame & frame) override
         {
             using Eigen::AngleAxisf;
             using Eigen::Vector3f;
 
-            const auto dt = std::min(0.25, time_since_prev);
+            const auto dt = std::min(0.25, frame.time_since_prev_frame());
             auto & camera = window.camera();
 
             Vector3f strafe_direction = Eigen::Vector3f::Zero();
@@ -385,10 +385,10 @@ namespace merely3d
             return false;
         }
 
-        void before_frame(Window &window, double time_since_previous_frame_begin) override {
-            _look_mouse.before_frame(window, time_since_previous_frame_begin);
-            _look_key.before_frame(window, time_since_previous_frame_begin);
-            _strafe.before_frame(window, time_since_previous_frame_begin);
+        void before_frame(Window &window, Frame & frame) override {
+            _look_mouse.before_frame(window, frame);
+            _look_key.before_frame(window, frame);
+            _strafe.before_frame(window, frame);
         }
 
         void after_frame(Window &window, double frame_duration) override {

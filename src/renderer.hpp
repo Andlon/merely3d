@@ -22,8 +22,7 @@ namespace merely3d
 
         void render(CommandBuffer & buffer,
                     const Camera & camera,
-                    int viewport_width,
-                    int viewport_height);
+                    const Eigen::Matrix4f & projection);
 
         static Renderer build();
 

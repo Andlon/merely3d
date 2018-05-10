@@ -17,6 +17,53 @@ typedef std::unique_ptr<GLFWwindow, GlfwWindowDestroyFunc> GlfwWindowPtr;
 
 namespace merely3d
 {
+    const double NEAR_PLANE = 0.1f;
+
+    /// Computes the "infinite" projection matrix with the given
+    /// vertical field of view `fovy`, aspect ratio and the distance to
+    /// the near plane.
+    ///
+    /// The projection matrix maps points from the view space in which
+    /// negative z is "in front of" the camera. In other words,
+    /// positive z values are not shown.
+    template <typename T>
+    Eigen::Matrix<T, 4, 4> projection_matrix(T fovy, T aspect_ratio, T near_plane_dist)
+    {
+        assert(fovy > 0.0);
+        assert(aspect_ratio > 0.0);
+        assert(near_plane_dist > 0.0);
+        const auto n = near_plane_dist;
+
+        // Note: this is the perspective matrix with the far plane infinitely far away.
+        // It will likely suffer some depth precision issues at large distances.
+        // An interesting way to remedy this would be to follow the suggestion in the
+        // following blogpost: https://chaosinmotion.blog/2010/09/06/goodbye-far-clipping-plane/
+        // Essentially, there it's advocated to use a projection matrix which projects the far plane
+        // (which is infinitely far away) onto z = 0, rather than z = 1. Floating point numbers are
+        // able to represent numbers close to 0 much better than numbers close to 1,
+        // so the end effect is a much more precise result. This would require setting the
+        // clip plane in OpenGL through glClipPlane, however.
+        Eigen::Matrix<T, 4, 4> p;
+        p << (fovy / aspect_ratio),  0.0,  0.0,      0.0,
+                            0.0, fovy,  0.0,      0.0,
+                            0.0,  0.0, -1.0, -2.0 * n,
+                            0.0,  0.0, -1.0,      0.0;
+        return p;
+    }
+
+    template <typename T>
+    Eigen::Matrix<T, 4, 4> projection_matrix(T fovy, T near_plane_dist, int viewport_width, int viewport_height)
+    {
+        const auto width = static_cast<double>(viewport_width);
+        const auto height = static_cast<double>(viewport_height);
+
+        // Guard against zero width/height, which may technically be a valid state
+        const auto aspect_ratio = width > 0.0 && height > 0.0
+                                  ? width / height
+                                  : 1.0;
+        return projection_matrix(fovy, static_cast<T>(aspect_ratio), near_plane_dist);
+    }
+
     class Window::WindowData
     {
     public:
@@ -26,7 +73,8 @@ namespace merely3d
               renderer(std::move(renderer)),
               // Put the first frame time maximally far away in the future,
               // and special case when determining time since last frame
-              previous_frame_time(std::chrono::steady_clock::time_point::max())
+              previous_frame_time(std::chrono::steady_clock::time_point::max()),
+              fovy(1.57)
         {}
 
         GlfwWindowPtr glfw_window;
@@ -39,6 +87,8 @@ namespace merely3d
 
         std::chrono::steady_clock::time_point previous_frame_time;
         std::vector<std::shared_ptr<EventHandler>> event_handlers;
+
+        float fovy;
     };
 
     static void check_and_update_viewport_size(GLFWwindow * window, int & viewport_width, int & viewport_height)
@@ -223,8 +273,9 @@ namespace merely3d
         auto & vp_height = _d->viewport_size.second;
 
         check_and_update_viewport_size(_d->glfw_window.get(), vp_width, vp_height);
+        const auto projection = projection_matrix(static_cast<double>(_d->fovy), NEAR_PLANE, vp_width, vp_height);
 
-        _d->renderer.render(_d->command_buffer, _d->camera, vp_width, vp_height);
+        _d->renderer.render(_d->command_buffer, _d->camera, projection.cast<float>());
 
         get_command_buffer()->clear();
 
@@ -253,7 +304,7 @@ namespace merely3d
         _d->event_handlers.push_back(std::move(handler));
     }
 
-    void Window::begin_frame()
+    Frame Window::begin_frame()
     {
         double time_since_previous_frame = 0.0;
         const auto now = std::chrono::steady_clock::now();
@@ -263,10 +314,14 @@ namespace merely3d
             time_since_previous_frame = duration.count();
         }
         _d->previous_frame_time = now;
+
+        Frame frame(get_command_buffer(), time_since_previous_frame);
         for (auto & handler : _d->event_handlers)
         {
-            handler->before_frame(*this, time_since_previous_frame);
+            handler->before_frame(*this, frame);
         }
+
+        return std::move(frame);
     }
 
     void Window::end_frame()
@@ -311,10 +366,39 @@ namespace merely3d
         }
     }
 
-    Action Window::get_last_key_action(Key key)
+    Action Window::get_last_key_action(Key key) const
     {
         const auto glfw_action = glfwGetKey(_d->glfw_window.get(), glfw_key_from_key(key));
         return action_from_glfw(glfw_action);
+    }
+
+    ScreenCoords Window::get_current_cursor_position() const
+    {
+        ScreenCoords s;
+        glfwGetCursorPos(_d->glfw_window.get(), &s.x, &s.y);
+        return s;
+    }
+
+    Eigen::Vector3f Window::unproject_screen_coordinates(const ScreenCoords & coords)
+    {
+        const auto vp_width = _d->viewport_size.first;
+        const auto vp_height = _d->viewport_size.second;
+
+        const auto projection = projection_matrix(static_cast<double>(fovy()), NEAR_PLANE, vp_width, vp_height);
+
+        /// Transform screen coordinates into normalized device coordinates
+        const auto window_size = this->size();
+        const auto w = static_cast<double>(window_size.width);
+        const auto h = static_cast<double>(window_size.height);
+        const auto ndc_x = 2.0 * (coords.x - w / 2.0) / w;
+        const auto ndc_y = -2.0 * (coords.y - h / 2.0) / h;
+
+        /// Define point in normalized device coordinates and project it back, using
+        /// the assumption that it's located on the near plane.
+        const Eigen::Vector4d ndc_point(ndc_x, ndc_y, -1.0, 1.0);
+        const Eigen::Vector4d view_point = projection.inverse() * NEAR_PLANE * ndc_point;
+
+        return view_point.head<3>().cast<float>();
     }
 
     WindowSize Window::size() const
@@ -323,6 +407,20 @@ namespace merely3d
         auto glfw_window = _d->glfw_window.get();
         glfwGetWindowSize(glfw_window, &size.width, &size.height);
         return size;
+    }
+
+    float Window::fovy() const
+    {
+        return _d->fovy;
+    }
+
+    void Window::set_fovy(float fovy)
+    {
+        if (fovy <= 0.0f || fovy >= 3.142f)
+        {
+            throw std::invalid_argument("fovy must be a positive number between 0 and PI");
+        }
+        _d->fovy = fovy;
     }
 
     Window WindowBuilder::build() const

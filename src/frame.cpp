@@ -8,6 +8,11 @@ using Eigen::DiagonalMatrix;
 
 namespace merely3d
 {
+    double Frame::time_since_prev_frame() const
+    {
+        return _delta_time;
+    }
+
     template <>
     void Frame::draw(const merely3d::Renderable<Box> &renderable)
     {

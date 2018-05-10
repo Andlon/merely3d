@@ -30,6 +30,15 @@ namespace merely3d
         int height;
     };
 
+    struct ScreenCoords
+    {
+        double x;
+        double y;
+
+        ScreenCoords() : x(0.0), y(0.0) {}
+        ScreenCoords(double x, double y) : x(x), y(y) {}
+    };
+
     class Window final
     {
     public:
@@ -44,9 +53,7 @@ namespace merely3d
         {
             make_current();
             poll_events();
-            begin_frame();
-            auto buffer = get_command_buffer();
-            Frame frame(buffer);
+            auto frame = begin_frame();
             std::forward<RenderFunc>(render_func)(frame);
             render_frame_impl(frame);
         }
@@ -72,7 +79,26 @@ namespace merely3d
         /// Returns the size of the windows in screen coordinates (not necessarily pixels).
         WindowSize size() const;
 
-        Action get_last_key_action(Key key);
+        Action get_last_key_action(Key key) const;
+
+        ScreenCoords get_current_cursor_position() const;
+
+        /// Compute the point on the near plane of the view frustrum
+        /// corresponding to the given screen coordinates.
+        ///
+        /// The coordinates returned are given in view space,
+        /// so in order to obtain world coordinates, the inverse view transform
+        /// (as provided by the Camera) must be used.
+        Eigen::Vector3f unproject_screen_coordinates(const ScreenCoords & coords);
+
+        /// Returns the (vertical) field of view used for perspective transformation.
+        float fovy() const;
+
+        /// Set the vertical field of view used for perspective transformation.
+        ///
+        /// The horizontal FOV is determined by the vertical FOV and the aspect
+        /// ratio of the viewport. Must be a positive number in the interval (0, PI).
+        void set_fovy(float fovy);
 
     private:
         friend class WindowBuilder;
@@ -86,7 +112,7 @@ namespace merely3d
 
         Window(WindowData * data);
 
-        void begin_frame();
+        Frame begin_frame();
         void end_frame();
         void render_frame_impl(Frame & frame);
         CommandBuffer * get_command_buffer();

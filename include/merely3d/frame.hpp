@@ -17,19 +17,24 @@ namespace merely3d
     {
     public:
         Frame(const Frame &) = delete;
-        Frame(Frame &&) = delete;
 
         template <typename Shape>
         void draw(const Renderable<Shape> &renderable);
 
         void draw_line(const Line & line);
 
+        /// Returns the number of seconds since the beginning of the previous frame.
+        double time_since_prev_frame() const;
+
     private:
-        Frame(CommandBuffer * buffer) : _buffer(buffer) {}
+        Frame(CommandBuffer * buffer, double delta_elapsed_time)
+            : _buffer(buffer), _delta_time(delta_elapsed_time) {}
+        Frame(Frame && frame) : _buffer(frame._buffer), _delta_time(frame._delta_time) {}
         ~Frame() {}
         friend class Window;
 
         CommandBuffer * _buffer;
+        double _delta_time;
     };
 
     template <>
