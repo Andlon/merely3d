@@ -7,7 +7,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/embed_shaders.cmake)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/extern/glfw-3.2.1")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/extern/glfw")
 
 find_package(OpenGL REQUIRED)
 find_package(Eigen3 3.3 NO_MODULE)
