@@ -33,6 +33,69 @@ using Eigen::Vector3f;
 using Eigen::Quaternionf;
 using Eigen::AngleAxisf;
 
+/// A simple click event handler, showcasing how to handle click events,
+/// as well as how to map screen coordinates to a ray moving
+/// out from the camera, which can be used in e.g. mouse picking applications.
+///
+/// Here we just render the corresponding ray and let it stay in the simulation for
+/// a few seconds before removing it (e.g. the lifetime variable below).
+class ClickEventHandler : public merely3d::EventHandler
+{
+public:
+    ClickEventHandler()
+        : line(Vector3f::Zero(), Vector3f::Zero()),
+          lifetime(0.0)
+    {
+        line.color = merely3d::red();
+    }
+
+    bool mouse_button_press(merely3d::Window &window,
+                            merely3d::MouseButton button,
+                            merely3d::Action action,
+                            int) override
+    {
+        using merely3d::MouseButton;
+        using merely3d::Action;
+
+        if (button == MouseButton::Right && action == Action::Press)
+        {
+            const auto cursor_pos = window.get_current_cursor_position();
+            const auto view_pos = window.unproject_screen_coordinates(cursor_pos);
+
+            const Vector3f world_pos = window.camera().transform() * view_pos;
+            const Vector3f direction = (world_pos - window.camera().position()).normalized();
+
+            const float ray_length = 100.0f;
+
+            line.from = window.camera().position() + 0.3 * direction;
+            line.to = window.camera().position() + ray_length * direction;
+            lifetime = 10.0f;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    void before_frame(Window &, Frame & frame) override
+    {
+        if (lifetime > 0.0f)
+        {
+            frame.draw_line(line);
+            frame.draw(renderable(Sphere(0.001))
+                        .with_position(line.from)
+                        .with_material(Material().with_color(merely3d::red())
+                                                 .with_pattern_grid_size(0.0f)));
+        }
+
+        lifetime = std::max(0.0, lifetime - frame.time_since_prev_frame());
+    }
+
+private:
+    merely3d::Line line;
+    double lifetime;
+};
+
 int main()
 {
     // Constructing the app first is essential: it makes sure that
@@ -52,6 +115,7 @@ int main()
     window.camera().set_position(Vector3f(-1.0, 0.0, 3.0));
 
     window.add_event_handler(std::shared_ptr<EventHandler>(new CameraController));
+    window.add_event_handler(std::shared_ptr<EventHandler>(new ClickEventHandler));
 
     while (!window.should_close())
     {
