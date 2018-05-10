@@ -225,7 +225,7 @@ namespace merely3d
     public:
 
         CameraStrafeKeyController()
-                : _velocity(0.25f)
+                : _velocity(4.0f)
         {}
 
         float strafe_velocity() const
@@ -265,7 +265,7 @@ namespace merely3d
             using Eigen::AngleAxisf;
             using Eigen::Vector3f;
 
-            const auto dt = std::max(0.25, time_since_prev);
+            const auto dt = std::min(0.25, time_since_prev);
             auto & camera = window.camera();
 
             Vector3f strafe_direction = Eigen::Vector3f::Zero();
