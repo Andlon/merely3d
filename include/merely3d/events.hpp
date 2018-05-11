@@ -5,6 +5,7 @@
 namespace merely3d
 {
     class Window;
+    class Frame;
 
     enum class MouseButton
     {
