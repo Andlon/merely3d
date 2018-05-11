@@ -38,10 +38,10 @@ void main()
     ivec3 grid_coords = pattern_grid_size > 0.0
         ? ivec3(round(local_pos / pattern_grid_size))
         : ivec3(0);
-    bool patterned = (grid_coords[0] + grid_coords[1] + grid_coords[2]) % 2 == 0;
+    bool patterned = (grid_coords[0] + grid_coords[1] + grid_coords[2]) % 2 != 0;
 
     vec3 base_color = patterned
-                    ? 0.85 * object_color
+                    ? 0.9 * object_color
                     : object_color;
 
     vec3 normal = normalize(normal_world);
