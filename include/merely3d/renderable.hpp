@@ -78,6 +78,11 @@ namespace merely3d
             return with_scale(Eigen::Vector3f(x_scale, y_scale, z_scale));
         }
 
+        Renderable<Shape> with_uniform_scale(float scale)
+        {
+            return with_scale(scale, scale, scale);
+        }
+
         Renderable<Shape> with_material(const Material & material)
         {
             auto result = *this;

@@ -168,10 +168,25 @@ int main()
                         .with_position(0.0, 8.0, 10.0)
                         .with_material(Material().with_wireframe(true)));
 
+            const auto yrot = AngleAxisf(1.57, Vector3f(0.0, 1.0, 0.0));
+            const auto zrot = AngleAxisf(1.57, Vector3f(0.0, 0.0, 1.0));
+            const auto model_color = Color(0.0, 0.6, 0.0);
+
+            // Render a few instances of our example model. Note: It looks like the connectivity
+            // of our model may be a little messed up, and as a result attempts to render the model
+            // as a wireframe may give strange results.
             frame.draw(renderable(model)
-                        .with_position(8.0, 8.0, 5.0)
+                        .with_position(8.0, 8.0, 0.0)
+                        .with_orientation(zrot * zrot * yrot * zrot)
                         .with_material(Material().with_pattern_grid_size(0.0f)
-                                                 .with_color(green())));
+                                                 .with_color(model_color)));
+
+            frame.draw(renderable(model)
+                               .with_position(4.0, 4.0, 0.0)
+                               .with_uniform_scale(0.3)
+                               .with_orientation(zrot * zrot * zrot * yrot * zrot)
+                               .with_material(Material().with_pattern_grid_size(0.0f)
+                                                      .with_color(model_color)));
 
             frame.draw_line(Line(Vector3f(0.0, 0.0, 0.0), Vector3f(10.0, -5.0, 10.0)));
 
