@@ -36,7 +36,8 @@ set(LIB_HEADERS
     include/merely3d/events.hpp
     include/merely3d/color.hpp
     include/merely3d/camera_controller.hpp
-    include/merely3d/app.hpp)
+    include/merely3d/app.hpp
+	include/merely3d/mesh.hpp)
 
 set(LIB_FILES
     src/window.cpp
@@ -48,12 +49,13 @@ set(LIB_FILES
     src/renderer.cpp
     src/event_convert.hpp
     src/gl_primitive.hpp
+	src/gl_triangle_mesh.hpp
     src/app.cpp
     src/mesh_util.hpp
     src/gl_line.hpp
-    src/triangle_primitive_renderer.hpp
-    src/triangle_primitive_renderer.cpp
-    src/shader_collection.hpp
+		src/renderers.hpp
+		src/renderers.cpp
+		src/shader_collection.hpp
     src/shader_collection.cpp)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)

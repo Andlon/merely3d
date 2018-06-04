@@ -3,6 +3,7 @@
 #include <merely3d/material.hpp>
 #include <merely3d/primitives.hpp>
 #include <merely3d/renderable.hpp>
+#include <merely3d/mesh.hpp>
 
 #include <Eigen/Dense>
 
@@ -24,17 +25,20 @@ namespace merely3d
         const std::vector<Renderable<Rectangle>> &  rectangles() const;
         const std::vector<Renderable<Box>> &        boxes() const;
         const std::vector<Renderable<Sphere>> &     spheres() const;
+        const std::vector<Renderable<StaticMesh>> & meshes() const;
         const std::vector<Line> &                   lines() const;
 
         std::vector<Renderable<Rectangle>> &  rectangles();
         std::vector<Renderable<Box>> &        boxes();
         std::vector<Renderable<Sphere>> &     spheres();
+        std::vector<Renderable<StaticMesh>> & meshes();
         std::vector<Line> &                   lines();
 
     private:
         std::vector<Renderable<Rectangle>>  _rectangles;
         std::vector<Renderable<Box>>        _boxes;
         std::vector<Renderable<Sphere>>     _spheres;
+        std::vector<Renderable<StaticMesh>> _meshes;
         std::vector<Line>                   _lines;
     };
 
@@ -43,6 +47,7 @@ namespace merely3d
         _rectangles.clear();
         _boxes.clear();
         _spheres.clear();
+        _meshes.clear();
         _lines.clear();
     }
 
@@ -59,6 +64,11 @@ namespace merely3d
     inline const std::vector<Renderable<Sphere>> & CommandBuffer::spheres() const
     {
         return _spheres;
+    }
+
+    inline const std::vector<Renderable<StaticMesh>> & CommandBuffer::meshes() const
+    {
+        return _meshes;
     }
 
     inline const std::vector<Line> & CommandBuffer::lines() const {
@@ -80,7 +90,13 @@ namespace merely3d
         return _spheres;
     }
 
-    inline std::vector<Line> & CommandBuffer::lines() {
+    inline std::vector<Renderable<StaticMesh>> & CommandBuffer::meshes()
+    {
+        return _meshes;
+    }
+
+    inline std::vector<Line> & CommandBuffer::lines()
+    {
         return _lines;
     }
 
@@ -106,6 +122,12 @@ namespace merely3d
     inline void CommandBuffer::push_renderable(const Renderable<Sphere> &renderable)
     {
         _spheres.push_back(renderable);
+    }
+
+    template <>
+    inline void CommandBuffer::push_renderable(const merely3d::Renderable<StaticMesh> &renderable)
+    {
+        _meshes.push_back(renderable);
     }
 
     inline void CommandBuffer::push_line(const Line &line)

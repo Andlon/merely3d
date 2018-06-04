@@ -14,6 +14,7 @@ namespace merely3d
     {
         return Renderer(ShaderCollection::create_in_context(),
                         TrianglePrimitiveRenderer::build(),
+                        MeshRenderer::build(),
                         GlLine::create());
     }
 
@@ -27,6 +28,7 @@ namespace merely3d
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         primitive_renderer.render(shader_collection, buffer, camera, projection);
+        mesh_renderer.render(shader_collection, buffer, camera, projection);
 
         // TODO: Create a LineRenderer class or similar to encapsulate
         // line rendering

@@ -1,4 +1,4 @@
-#include "triangle_primitive_renderer.hpp"
+#include "renderers.hpp"
 #include "mesh_util.hpp"
 
 #include <Eigen/Dense>
@@ -31,6 +31,59 @@ namespace merely3d
         {
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
+    }
+
+    /// Renders a set of static meshes that all share the same GlTriangleMesh. This is useful if the same 3D model
+    /// is being rendered many times, but with different transforms or materials.
+    ///
+    /// NB! Assumes that the uniforms not specific
+    /// to the individual renderable are all correctly set.
+    void render_static_meshes(std::vector<Renderable<StaticMesh>> & renderables,
+                              GlTriangleMesh & gl_mesh,
+                              ShaderCollection & shaders)
+    {
+        gl_mesh.bind();
+        auto & line_shader = shaders.line_shader();
+        auto & mesh_shader = shaders.mesh_shader();
+
+        auto draw_primitive = [&] (const Renderable<StaticMesh> & renderable)
+        {
+            const auto ref_transform = Eigen::Matrix3f::Identity();
+            const auto model = build_model_transform(renderable);
+
+            if (renderable.material.wireframe)
+            {
+                line_shader.set_model_transform(model);
+                line_shader.set_object_color(renderable.material.color);
+                glDrawElements(GL_TRIANGLES, gl_mesh.index_count(), GL_UNSIGNED_INT, 0);
+            }
+            else
+            {
+                const auto normal_transform = Matrix3f(model.linear().inverse().transpose());
+                mesh_shader.set_model_transform(model);
+                mesh_shader.set_normal_transform(normal_transform);
+                mesh_shader.set_object_color(renderable.material.color);
+                mesh_shader.set_reference_transform(ref_transform);
+                mesh_shader.set_pattern_grid_size(std::max(0.0f, renderable.material.pattern_grid_size));
+                glDrawElements(GL_TRIANGLES, gl_mesh.triangle_count() * 3, GL_UNSIGNED_INT, 0);
+            }
+        };
+
+        // Partition vector so that renderables that are to be rendered as wireframes
+        // come first
+        auto filled_begin = std::partition(renderables.begin(), renderables.end(),
+                                           [] (const Renderable<StaticMesh> & renderable)
+                                           {
+                                               return renderable.material.wireframe;
+                                           });
+
+        line_shader.use();
+        enable_wireframe_rendering(true);
+        std::for_each(renderables.begin(), filled_begin, draw_primitive);
+
+        mesh_shader.use();
+        enable_wireframe_rendering(false);
+        std::for_each(filled_begin, renderables.end(), draw_primitive);
     }
 
     /// Render primitives.
@@ -157,5 +210,81 @@ namespace merely3d
         glDisable(GL_CULL_FACE);
         render_primitives(buffer.boxes(), shaders, gl_cube, box_reference_transform);
         render_primitives(buffer.spheres(), shaders, gl_sphere, sphere_reference_transform);
+    }
+
+    MeshRenderer MeshRenderer::build()
+    {
+        return MeshRenderer();
+    }
+
+    void MeshRenderer::render(ShaderCollection &shaders,
+                              CommandBuffer &buffer,
+                              const Camera &camera,
+                              const Eigen::Matrix4f &projection)
+    {
+        // TODO: Merge some of the code here with the code in TrianglePrimitiveRenderer
+        auto & mesh_shader = shaders.mesh_shader();
+        auto & line_shader = shaders.line_shader();
+
+        const Eigen::Affine3f view = camera.transform().inverse();
+
+        // TODO: Make lighting configurable rather than hard-coded
+        const auto light_color = Color(1.0, 1.0, 1.0);
+        const Eigen::Vector3f light_dir = Eigen::Vector3f(0.9, 1.2, -0.8).normalized();
+
+        // Set up uniforms that are invariant across renderables
+        mesh_shader.use();
+        mesh_shader.set_light_color(light_color);
+        mesh_shader.set_light_direction(light_dir);
+        mesh_shader.set_view_transform(view);
+        mesh_shader.set_projection_transform(projection);
+        mesh_shader.set_camera_position(camera.position());
+        line_shader.use();
+        line_shader.set_projection_transform(projection);
+        line_shader.set_view_transform(view);
+
+        glDisable(GL_CULL_FACE);
+
+        auto & meshes = buffer.meshes();
+
+        // Make sure that meshes that share the same underlying data are consecutive in the buffer
+        std::sort(meshes.begin(), meshes.end(),
+                  [] (const Renderable<StaticMesh> & mesh1, const Renderable<StaticMesh> & mesh2)
+        {
+            const auto ptr1 = mesh1.shape._data.get();
+            const auto ptr2 = mesh2.shape._data.get();
+            return ptr1 < ptr2;
+        });
+
+        std::vector<Renderable<StaticMesh>> consecutive_meshes;
+
+        auto outer_iter = meshes.cbegin();
+        auto inner_iter = meshes.cbegin();
+
+        while (outer_iter != meshes.cend())
+        {
+            const auto outer_ptr = outer_iter->shape._data.get();
+            while (inner_iter != meshes.cend() && inner_iter->shape._data.get() == outer_ptr)
+            {
+                ++inner_iter;
+            }
+            consecutive_meshes.assign(outer_iter, inner_iter);
+
+            auto cache_iter = _mesh_cache.find(outer_ptr);
+            if (cache_iter == _mesh_cache.end())
+            {
+                const auto & mesh_data = *outer_iter->shape._data;
+                auto gl_mesh = GlTriangleMesh::create(mesh_data.vertices_and_normals, mesh_data.faces);
+                _mesh_cache.insert(std::make_pair(outer_ptr, std::move(gl_mesh)));
+            }
+
+            cache_iter = _mesh_cache.find(outer_ptr);
+            auto & gl_mesh = cache_iter->second;
+
+            render_static_meshes(consecutive_meshes, gl_mesh, shaders);
+
+            outer_iter = inner_iter;
+        }
+
     }
 }

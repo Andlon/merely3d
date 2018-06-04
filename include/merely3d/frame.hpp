@@ -8,6 +8,7 @@
 #include <merely3d/material.hpp>
 #include <merely3d/primitives.hpp>
 #include <merely3d/renderable.hpp>
+#include <merely3d/mesh.hpp>
 
 namespace merely3d
 {
@@ -45,6 +46,9 @@ namespace merely3d
 
     template <>
     void Frame::draw(const merely3d::Renderable<Sphere> & sphere);
+
+    template <>
+    void Frame::draw(const merely3d::Renderable<StaticMesh> & mesh);
 
     template <typename Shape>
     void Frame::draw(const merely3d::Renderable<Shape> &renderable)

@@ -9,7 +9,7 @@
 #include "gl_line.hpp"
 #include "shader_collection.hpp"
 
-#include "triangle_primitive_renderer.hpp"
+#include "renderers.hpp"
 
 namespace merely3d
 {
@@ -29,14 +29,17 @@ namespace merely3d
     private:
         Renderer(ShaderCollection && shader_collection,
                  TrianglePrimitiveRenderer && primitive_renderer,
+                 MeshRenderer && mesh_renderer,
                  GlLine && gl_line)
             : shader_collection(std::move(shader_collection)),
               primitive_renderer(std::move(primitive_renderer)),
+              mesh_renderer(std::move(mesh_renderer)),
               gl_line(std::move(gl_line))
         {}
 
         ShaderCollection shader_collection;
         TrianglePrimitiveRenderer primitive_renderer;
+        MeshRenderer mesh_renderer;
         GlLine      gl_line;
     };
 

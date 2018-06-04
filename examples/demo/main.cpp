@@ -10,6 +10,8 @@
 
 #include <Eigen/Geometry>
 
+#include "example_model.hpp"
+
 using merely3d::Window;
 using merely3d::WindowBuilder;
 using merely3d::Frame;
@@ -22,6 +24,7 @@ using merely3d::CameraController;
 using merely3d::Line;
 
 using merely3d::red;
+using merely3d::green;
 
 using merely3d::renderable;
 using merely3d::Rectangle;
@@ -117,9 +120,18 @@ int main()
     window.add_event_handler(std::shared_ptr<EventHandler>(new CameraController));
     window.add_event_handler(std::shared_ptr<EventHandler>(new ClickEventHandler));
 
+    // Create a static mesh which we can use when rendering
+    const auto & vn = merely3d::example_model::vertices_and_normals;
+    const auto & idx = merely3d::example_model::indices;
+    const auto model_vertices_normals = std::vector<float>(vn.begin(), vn.end());
+    const auto model_indices = std::vector<unsigned int>(idx.begin(), idx.end());
+    const auto model = merely3d::StaticMesh(model_vertices_normals, model_indices);
+
+    std::cout << model_vertices_normals.size() << std::endl;
+
     while (!window.should_close())
     {
-        window.render_frame([] (Frame & frame)
+        window.render_frame([&model] (Frame & frame)
         {
             frame.draw(renderable(Rectangle(0.5, 0.5))
                         .with_position(1.0, 0.0, 0.5)
@@ -155,6 +167,11 @@ int main()
             frame.draw(renderable(Rectangle(10.0, 2.0))
                         .with_position(0.0, 8.0, 10.0)
                         .with_material(Material().with_wireframe(true)));
+
+            frame.draw(renderable(model)
+                        .with_position(8.0, 8.0, 5.0)
+                        .with_material(Material().with_pattern_grid_size(0.0f)
+                                                 .with_color(green())));
 
             frame.draw_line(Line(Vector3f(0.0, 0.0, 0.0), Vector3f(10.0, -5.0, 10.0)));
 
