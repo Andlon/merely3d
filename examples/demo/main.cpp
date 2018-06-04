@@ -99,6 +99,16 @@ private:
     double lifetime;
 };
 
+merely3d::StaticMesh load_example_model()
+{
+    // Create a static mesh which we can use when rendering
+    const auto & vn = merely3d::example_model::vertices_and_normals;
+    const auto & idx = merely3d::example_model::indices;
+    const auto model_vertices_normals = std::vector<float>(vn.begin(), vn.end());
+    const auto model_indices = std::vector<unsigned int>(idx.begin(), idx.end());
+    return merely3d::StaticMesh(model_vertices_normals, model_indices);
+}
+
 int main()
 {
     // Constructing the app first is essential: it makes sure that
@@ -120,14 +130,15 @@ int main()
     window.add_event_handler(std::shared_ptr<EventHandler>(new CameraController));
     window.add_event_handler(std::shared_ptr<EventHandler>(new ClickEventHandler));
 
-    // Create a static mesh which we can use when rendering
-    const auto & vn = merely3d::example_model::vertices_and_normals;
-    const auto & idx = merely3d::example_model::indices;
-    const auto model_vertices_normals = std::vector<float>(vn.begin(), vn.end());
-    const auto model_indices = std::vector<unsigned int>(idx.begin(), idx.end());
-    const auto model = merely3d::StaticMesh(model_vertices_normals, model_indices);
-
-    std::cout << model_vertices_normals.size() << std::endl;
+    // Create a static mesh which we can use when rendering.
+    // Even though we draw the model in every frame in the code below, merely3d
+    // internally manages the data transfer so that it typically only happens on the first
+    // frame the model is used. Moreover, if several instances of the same model data
+    // is rendered in the same frame, merely3d will similarly avoid unnecessary memory transfers
+    // and internally reuse the OpenGL resources. Hence you may simply load your models
+    // outside your rendering loop, and then afterwards not worry about the overhead
+    // of repeatedly drawing your models.
+    const auto model = load_example_model();
 
     while (!window.should_close())
     {
