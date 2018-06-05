@@ -65,7 +65,7 @@ namespace merely3d
                 mesh_shader.set_object_color(renderable.material.color);
                 mesh_shader.set_reference_transform(ref_transform);
                 mesh_shader.set_pattern_grid_size(std::max(0.0f, renderable.material.pattern_grid_size));
-                glDrawElements(GL_TRIANGLES, gl_mesh.triangle_count() * 3, GL_UNSIGNED_INT, 0);
+                glDrawElements(GL_TRIANGLES, gl_mesh.index_count(), GL_UNSIGNED_INT, 0);
             }
         };
 

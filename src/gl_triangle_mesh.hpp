@@ -57,7 +57,7 @@ namespace merely3d
 
         size_t triangle_count() const
         {
-            return num_indices * 3;
+            return num_indices / 3;
         }
 
         size_t index_count() const
@@ -67,7 +67,7 @@ namespace merely3d
 
     private:
         GlTriangleMesh(GLuint vao, GLuint vbo, GLuint ebo, size_t num_vertices, size_t num_triangles)
-                : vao(vao), vbo(vbo), ebo(ebo), num_vertices(num_vertices), num_indices(num_triangles / 3)
+                : vao(vao), vbo(vbo), ebo(ebo), num_vertices(num_vertices), num_indices(num_triangles * 3)
         {
             assert(num_triangles % 3 == 0);
         }
