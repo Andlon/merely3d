@@ -7,14 +7,29 @@ namespace merely3d
 {
     namespace detail
     {
+        typedef uint64_t UniqueMeshId;
+
+        inline UniqueMeshId next_mesh_id()
+        {
+            static UniqueMeshId next_id = 0;
+            return next_id++;
+        }
+
         struct StaticMeshData
         {
             std::vector<float> vertices_and_normals;
             std::vector<unsigned int> faces;
 
+            /// Globally unique ID for this mesh data. Needed for correct caching of mesh data.
+            /// Previously we used pointers, but in the case of frequent de- and reallocation,
+            /// different data may be placed at the exact same address, which makes the pointer-based approach
+            /// unreliable.
+            const UniqueMeshId id;
+
             StaticMeshData() = default;
             StaticMeshData(std::vector<float> vertices_and_normals, std::vector<unsigned int> faces)
-                    : vertices_and_normals(std::move(vertices_and_normals)), faces(std::move(faces))
+                    : vertices_and_normals(std::move(vertices_and_normals)), faces(std::move(faces)),
+                      id(next_mesh_id())
             {}
         };
     }

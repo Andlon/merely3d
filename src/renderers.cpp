@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 
 #include <algorithm>
+#include <unordered_set>
 
 using Eigen::Affine3f;
 using Eigen::Matrix3f;
@@ -261,29 +262,52 @@ namespace merely3d
         auto outer_iter = meshes.cbegin();
         auto inner_iter = meshes.cbegin();
 
+        // Keep track of which meshes were actually rendered, so that we may throw out
+        // the rest from our cache
+        std::unordered_set<detail::UniqueMeshId> rendered_meshes;
+
         while (outer_iter != meshes.cend())
         {
-            const auto outer_ptr = outer_iter->shape._data.get();
-            while (inner_iter != meshes.cend() && inner_iter->shape._data.get() == outer_ptr)
+            const auto outer_id = outer_iter->shape._data->id;
+            while (inner_iter != meshes.cend() && inner_iter->shape._data->id == outer_id)
             {
                 ++inner_iter;
             }
             consecutive_meshes.assign(outer_iter, inner_iter);
 
-            auto cache_iter = _mesh_cache.find(outer_ptr);
+            auto cache_iter = _mesh_cache.find(outer_id);
             if (cache_iter == _mesh_cache.end())
             {
                 const auto & mesh_data = *outer_iter->shape._data;
                 auto gl_mesh = GlTriangleMesh::create(mesh_data.vertices_and_normals, mesh_data.faces);
-                _mesh_cache.insert(std::make_pair(outer_ptr, std::move(gl_mesh)));
+                _mesh_cache.insert(std::make_pair(outer_id, std::move(gl_mesh)));
             }
 
-            cache_iter = _mesh_cache.find(outer_ptr);
+            cache_iter = _mesh_cache.find(outer_id);
             auto & gl_mesh = cache_iter->second;
 
             render_static_meshes(consecutive_meshes, gl_mesh, shaders);
+            rendered_meshes.insert(outer_id);
 
             outer_iter = inner_iter;
+        }
+
+        // TODO: The following removes unused meshes from the cache, but since our GlMesh implementation
+        // doesn't do proper garbage collection, we're still leaking OpenGL resources. In order to fix this,
+        // we need a proper garbage collection for OpenGL resources.
+        std::vector<detail::UniqueMeshId> meshes_to_remove;
+        for (const auto & pair : _mesh_cache)
+        {
+            const auto & id = pair.first;
+            if (rendered_meshes.count(id) == 0)
+            {
+                meshes_to_remove.push_back(id);
+            }
+        }
+
+        for (const auto & id : meshes_to_remove)
+        {
+            _mesh_cache.erase(id);
         }
 
     }

@@ -54,7 +54,7 @@ public:
 private:
     MeshRenderer() {}
 
-    std::unordered_map<const detail::StaticMeshData *, GlTriangleMesh> _mesh_cache;
+    std::unordered_map<detail::UniqueMeshId, GlTriangleMesh> _mesh_cache;
 };
 
 }
