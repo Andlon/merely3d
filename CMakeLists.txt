@@ -60,6 +60,11 @@ set(LIB_FILES
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
     add_compile_options(-Werror -Wall -Wextra)
+
+    if (MERELY_SANITIZE)
+        add_compile_options(-fsanitize=address -fsanitize=undefined)
+        link_libraries(-fsanitize=address -fsanitize=undefined)
+    endif()
 endif()
 
 add_library(merely3d ${LIB_FILES} ${LIB_HEADERS})
