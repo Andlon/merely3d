@@ -78,10 +78,17 @@ namespace merely3d
                                                return renderable.material.wireframe;
                                            });
 
+        // Don't cull faces when rendering wireframes
+        glDisable(GL_CULL_FACE);
         line_shader.use();
         enable_wireframe_rendering(true);
         std::for_each(renderables.begin(), filled_begin, draw_primitive);
 
+        // But do cull back faces for everything else
+        // (Note: This is especially important for correct rendering of "flat" meshes,
+        // in which a given triangle has two faces pointing opposite directions)
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
         mesh_shader.use();
         enable_wireframe_rendering(false);
         std::for_each(filled_begin, renderables.end(), draw_primitive);
@@ -132,10 +139,16 @@ namespace merely3d
                 return renderable.material.wireframe;
             });
 
+        // Don't cull faces when rendering wireframes
+        glDisable(GL_CULL_FACE);
         line_shader.use();
         enable_wireframe_rendering(true);
         std::for_each(renderables.begin(), filled_begin, draw_primitive);
 
+        // But do cull back faces for everything else
+        // (Note: this is absolutely necessary for rectangles)
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
         mesh_shader.use();
         enable_wireframe_rendering(false);
         std::for_each(filled_begin, renderables.end(), draw_primitive);
@@ -202,13 +215,7 @@ namespace merely3d
         line_shader.set_projection_transform(projection);
         line_shader.set_view_transform(view);
 
-        // Face culling is necessary to properly render rectangles from both sides
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
         render_primitives(buffer.rectangles(), shaders, gl_rectangle, rectangle_reference_transform);
-
-        // But we don't want to cull faces for other objects (for now, at least)
-        glDisable(GL_CULL_FACE);
         render_primitives(buffer.boxes(), shaders, gl_cube, box_reference_transform);
         render_primitives(buffer.spheres(), shaders, gl_sphere, sphere_reference_transform);
     }
@@ -243,8 +250,6 @@ namespace merely3d
         line_shader.use();
         line_shader.set_projection_transform(projection);
         line_shader.set_view_transform(view);
-
-        glDisable(GL_CULL_FACE);
 
         auto & meshes = buffer.meshes();
 
