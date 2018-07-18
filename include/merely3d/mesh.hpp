@@ -61,14 +61,14 @@ namespace merely3d
     };
 
     inline StaticMesh::StaticMesh(std::vector<float> vertices_and_normals, std::vector<unsigned int> faces)
-        : _data(new detail::StaticMeshData(std::forward<std::vector<float>>(vertices_and_normals),
-                                           std::forward<std::vector<unsigned int>>(faces)))
+        : _data(new detail::StaticMeshData(std::move(vertices_and_normals),
+                                           std::move(faces)))
     {
-        if (faces.size() % 3 != 0)
+        if (_data->faces.size() % 3 != 0)
         {
             throw std::invalid_argument("Faces must have size divisible by 3");
         }
-        if (vertices_and_normals.size() % 6 != 0)
+        if (_data->vertices_and_normals.size() % 6 != 0)
         {
             throw std::invalid_argument("Vertices and normals must have size divisible by 6");
         }
@@ -95,7 +95,7 @@ namespace merely3d
             throw std::invalid_argument("Number of vertices and normals must be the same.");
         }
 
-        const auto num_vertices = vertices.size();
+        const auto num_vertices = vertices.size() / 3;
         decltype(vertices) vertices_and_normals;
         auto & vn = vertices_and_normals;
 
