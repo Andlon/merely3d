@@ -49,13 +49,15 @@ set(LIB_FILES
     src/renderer.cpp
     src/event_convert.hpp
     src/gl_primitive.hpp
-	src/gl_triangle_mesh.hpp
+    src/gl_triangle_mesh.hpp
+    src/gl_gc.hpp
+    src/gl_gc.cpp
     src/app.cpp
     src/mesh_util.hpp
     src/gl_line.hpp
-		src/renderers.hpp
-		src/renderers.cpp
-		src/shader_collection.hpp
+    src/renderers.hpp
+    src/renderers.cpp
+    src/shader_collection.hpp
     src/shader_collection.cpp)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)

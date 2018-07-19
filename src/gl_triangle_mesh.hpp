@@ -6,6 +6,8 @@
 #include <vector>
 #include <cassert>
 
+#include "gl_gc.hpp"
+
 namespace merely3d
 {
     /// Helper class for managing meshes represented as
@@ -16,17 +18,22 @@ namespace merely3d
     public:
         GlTriangleMesh(GlTriangleMesh && other) noexcept
                 :   vao(other.vao), vbo(other.vbo), ebo(other.ebo),
-                    num_vertices(other.num_vertices), num_indices(other.num_indices)
+                    num_vertices(other.num_vertices), num_indices(other.num_indices),
+                    garbage(other.garbage)
         {
             other.vao = 0;
             other.vbo = 0;
             other.ebo = 0;
             other.num_vertices = 0;
             other.num_indices = 0;
+            other.garbage.reset();
         }
+
+        ~GlTriangleMesh();
 
         GlTriangleMesh(const GlTriangleMesh & other) = delete;
         GlTriangleMesh & operator=(const GlTriangleMesh & other) = delete;
+        GlTriangleMesh & operator=(GlTriangleMesh && other) = delete;
 
         /// Creates a new mesh allocated on the GPU, using the
         /// specified vertices and normals, in the format
@@ -41,7 +48,8 @@ namespace merely3d
         ///
         /// Shader attributes are set up according to the format
         /// description that was just presented.
-        static GlTriangleMesh create(const std::vector<float> & vertices_and_normals,
+        static GlTriangleMesh create(const std::shared_ptr<GlGarbagePile> & garbage,
+                                     const std::vector<float> & vertices_and_normals,
                                      const std::vector<unsigned int> &triangles);
 
         /// Binds the associated buffers of this mesh.
@@ -66,9 +74,11 @@ namespace merely3d
         }
 
     private:
-        GlTriangleMesh(GLuint vao, GLuint vbo, GLuint ebo, size_t num_vertices, size_t num_triangles)
-                : vao(vao), vbo(vbo), ebo(ebo), num_vertices(num_vertices), num_indices(num_triangles * 3)
+        GlTriangleMesh(const std::shared_ptr<GlGarbagePile> & garbage, GLuint vao, GLuint vbo, GLuint ebo, size_t num_vertices, size_t num_triangles)
+                : vao(vao), vbo(vbo), ebo(ebo), num_vertices(num_vertices), num_indices(num_triangles * 3),
+                  garbage(garbage)
         {
+            assert(this->garbage);
             assert(num_triangles % 3 == 0);
         }
 
@@ -78,9 +88,12 @@ namespace merely3d
 
         size_t num_vertices;
         size_t num_indices;
+
+        std::shared_ptr<GlGarbagePile> garbage;
     };
 
-    inline GlTriangleMesh GlTriangleMesh::create(const std::vector<float> & vertices_and_normals,
+    inline GlTriangleMesh GlTriangleMesh::create(const std::shared_ptr<GlGarbagePile> & garbage,
+                                                 const std::vector<float> & vertices_and_normals,
                                                  const std::vector<unsigned int> &triangles)
     {
         // Each vertex is represented by 3 floats for position and 3 floats for its associated normal
@@ -112,7 +125,7 @@ namespace merely3d
 
         glBindVertexArray(0);
 
-        return { vao, vbo, ebo, num_vertices, num_triangles };
+        return { garbage, vao, vbo, ebo, num_vertices, num_triangles };
     }
 
     inline void GlTriangleMesh::bind()
@@ -123,5 +136,15 @@ namespace merely3d
     inline void GlTriangleMesh::unbind()
     {
         glBindVertexArray(0);
+    }
+
+    inline GlTriangleMesh::~GlTriangleMesh()
+    {
+        if (garbage)
+        {
+            garbage->delete_element_buffer_later(ebo);
+            garbage->delete_vertex_buffer_later(vbo);
+            garbage->delete_vertex_array_later(vao);
+        }
     }
 }

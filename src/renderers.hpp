@@ -49,12 +49,14 @@ public:
                 const Camera & camera,
                 const Eigen::Matrix4f & projection);
 
-    static MeshRenderer build();
+    static MeshRenderer build(const std::shared_ptr<GlGarbagePile> & garbage);
 
 private:
-    MeshRenderer() {}
+    MeshRenderer(const std::shared_ptr<GlGarbagePile> & garbage)
+        : _garbage(garbage) { }
 
     std::unordered_map<detail::UniqueMeshId, GlTriangleMesh> _mesh_cache;
+    std::shared_ptr<GlGarbagePile>                           _garbage;
 };
 
 }

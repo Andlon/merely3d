@@ -12,10 +12,14 @@ namespace merely3d
 {
     Renderer Renderer::build()
     {
+        auto glgc = GlGarbageCollector();
+        assert(glgc.garbage());
+        auto mesh_renderer = MeshRenderer::build(glgc.garbage());
         return Renderer(ShaderCollection::create_in_context(),
                         TrianglePrimitiveRenderer::build(),
-                        MeshRenderer::build(),
-                        GlLine::create());
+                        std::move(mesh_renderer),
+                        GlLine::create(),
+                        std::move(glgc));
     }
 
     void Renderer::render(CommandBuffer & buffer,
@@ -57,6 +61,8 @@ namespace merely3d
             line_shader.set_object_color(line.color);
             glDrawArrays(GL_LINES, 0, 2);
         }
+
+        gc.collect_garbage();
 
     }
 }

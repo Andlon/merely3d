@@ -220,9 +220,9 @@ namespace merely3d
         render_primitives(buffer.spheres(), shaders, gl_sphere, sphere_reference_transform);
     }
 
-    MeshRenderer MeshRenderer::build()
+    MeshRenderer MeshRenderer::build(const std::shared_ptr<GlGarbagePile> & garbage)
     {
-        return MeshRenderer();
+        return MeshRenderer(garbage);
     }
 
     void MeshRenderer::render(ShaderCollection &shaders,
@@ -284,7 +284,7 @@ namespace merely3d
             if (cache_iter == _mesh_cache.end())
             {
                 const auto & mesh_data = *outer_iter->shape._data;
-                auto gl_mesh = GlTriangleMesh::create(mesh_data.vertices_and_normals, mesh_data.faces);
+                auto gl_mesh = GlTriangleMesh::create(_garbage, mesh_data.vertices_and_normals, mesh_data.faces);
                 _mesh_cache.insert(std::make_pair(outer_id, std::move(gl_mesh)));
             }
 
@@ -297,9 +297,6 @@ namespace merely3d
             outer_iter = inner_iter;
         }
 
-        // TODO: The following removes unused meshes from the cache, but since our GlMesh implementation
-        // doesn't do proper garbage collection, we're still leaking OpenGL resources. In order to fix this,
-        // we need a proper garbage collection for OpenGL resources.
         std::vector<detail::UniqueMeshId> meshes_to_remove;
         for (const auto & pair : _mesh_cache)
         {
