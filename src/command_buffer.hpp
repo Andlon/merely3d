@@ -22,17 +22,21 @@ namespace merely3d
 
         void push_line(const Line & line);
 
+        void push_particle(const Particle & particle);
+
         const std::vector<Renderable<Rectangle>> &  rectangles() const;
         const std::vector<Renderable<Box>> &        boxes() const;
         const std::vector<Renderable<Sphere>> &     spheres() const;
         const std::vector<Renderable<StaticMesh>> & meshes() const;
         const std::vector<Line> &                   lines() const;
+        const std::vector<Particle> &               particles() const;
 
         std::vector<Renderable<Rectangle>> &  rectangles();
         std::vector<Renderable<Box>> &        boxes();
         std::vector<Renderable<Sphere>> &     spheres();
         std::vector<Renderable<StaticMesh>> & meshes();
         std::vector<Line> &                   lines();
+        std::vector<Particle> &               particles();
 
     private:
         std::vector<Renderable<Rectangle>>  _rectangles;
@@ -40,6 +44,7 @@ namespace merely3d
         std::vector<Renderable<Sphere>>     _spheres;
         std::vector<Renderable<StaticMesh>> _meshes;
         std::vector<Line>                   _lines;
+        std::vector<Particle>               _particles;
     };
 
     inline void CommandBuffer::clear()
@@ -49,6 +54,7 @@ namespace merely3d
         _spheres.clear();
         _meshes.clear();
         _lines.clear();
+        _particles.clear();
     }
 
     inline const std::vector<Renderable<Rectangle>> & CommandBuffer::rectangles() const
@@ -75,6 +81,11 @@ namespace merely3d
         return _lines;
     }
 
+    inline const std::vector<Particle> & CommandBuffer::particles() const
+    {
+        return _particles;
+    }
+
     inline std::vector<Renderable<Rectangle>> & CommandBuffer::rectangles()
     {
         return _rectangles;
@@ -98,6 +109,11 @@ namespace merely3d
     inline std::vector<Line> & CommandBuffer::lines()
     {
         return _lines;
+    }
+
+    inline std::vector<Particle> & CommandBuffer::particles()
+    {
+        return _particles;
     }
 
     template<typename Shape>
@@ -133,6 +149,11 @@ namespace merely3d
     inline void CommandBuffer::push_line(const Line &line)
     {
         _lines.push_back(line);
+    }
+
+    inline void CommandBuffer::push_particle(const Particle & particle)
+    {
+        _particles.push_back(particle);
     }
 }
 

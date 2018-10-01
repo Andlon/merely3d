@@ -3,6 +3,7 @@
 #include "gl_line.hpp"
 #include "gl_primitive.hpp"
 #include "gl_triangle_mesh.hpp"
+#include "gl_particle_buffer.hpp"
 #include "shader.hpp"
 #include "shader_collection.hpp"
 #include "command_buffer.hpp"
@@ -57,6 +58,24 @@ private:
 
     std::unordered_map<detail::UniqueMeshId, GlTriangleMesh> _mesh_cache;
     std::shared_ptr<GlGarbagePile>                           _garbage;
+};
+
+class ParticleRenderer
+{
+public:
+    void render(ShaderCollection & shaders,
+                CommandBuffer & buffer,
+                const Camera & camera,
+                const Eigen::Matrix4f & projection);
+
+    static ParticleRenderer build(const std::shared_ptr<GlGarbagePile> & garbage);
+
+private:
+    ParticleRenderer(const std::shared_ptr<GlGarbagePile> & garbage, GlParticleBuffer && buffer)
+        : _particle_buffer(std::move(buffer)), _garbage(garbage) { }
+
+    GlParticleBuffer                    _particle_buffer;
+    std::shared_ptr<GlGarbagePile>      _garbage;
 };
 
 }

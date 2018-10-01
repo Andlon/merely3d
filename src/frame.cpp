@@ -41,4 +41,9 @@ namespace merely3d
     {
         _buffer->push_line(line);
     }
+
+    void Frame::draw_particle(const merely3d::Particle & particle)
+    {
+        _buffer->push_particle(particle);
+    }
 }

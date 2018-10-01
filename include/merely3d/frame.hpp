@@ -24,6 +24,8 @@ namespace merely3d
 
         void draw_line(const Line & line);
 
+        void draw_particle(const Particle & particle);
+
         /// Returns the number of seconds since the beginning of the previous frame.
         double time_since_prev_frame() const;
 

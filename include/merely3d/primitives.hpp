@@ -43,4 +43,35 @@ namespace merely3d
         Eigen::Vector3f to;
         Color           color;
     };
+
+    static const Color DEFAULT_PARTICLE_COLOR = Color(0.1, 0.1, 0.7);
+    static float DEFAULT_PARTICLE_RADIUS = 0.2;
+
+    struct Particle
+    {
+        Particle() : Particle(Eigen::Vector3f::Zero()) {}
+        Particle(const Eigen::Vector3f & position,
+                 float radius = DEFAULT_PARTICLE_RADIUS,
+                 const Color & color = DEFAULT_PARTICLE_COLOR)
+            : position(position), color(color), radius(radius) {}
+
+        Eigen::Vector3f position;
+        Color           color;
+        float           radius;
+
+        Particle with_radius(float new_radius) const
+        {
+            return Particle(position, new_radius, color);
+        }
+
+        Particle with_position(const Eigen::Vector3f & new_position) const
+        {
+            return Particle(new_position, radius, color);
+        }
+
+        Particle with_color(const Color & new_color) const
+        {
+            return Particle(position, radius, new_color);
+        }
+    };
 }
