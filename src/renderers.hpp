@@ -71,11 +71,10 @@ public:
     static ParticleRenderer build(const std::shared_ptr<GlGarbagePile> & garbage);
 
 private:
-    ParticleRenderer(const std::shared_ptr<GlGarbagePile> & garbage, GlParticleBuffer && buffer)
-        : _particle_buffer(std::move(buffer)), _garbage(garbage) { }
+    ParticleRenderer(GlParticleBuffer && buffer)
+        : _particle_buffer(std::move(buffer)) { }
 
     GlParticleBuffer                    _particle_buffer;
-    std::shared_ptr<GlGarbagePile>      _garbage;
 };
 
 }

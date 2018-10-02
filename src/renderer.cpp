@@ -15,9 +15,11 @@ namespace merely3d
         auto glgc = GlGarbageCollector();
         assert(glgc.garbage());
         auto mesh_renderer = MeshRenderer::build(glgc.garbage());
+        auto particle_renderer = ParticleRenderer::build(glgc.garbage());
         return Renderer(ShaderCollection::create_in_context(),
                         TrianglePrimitiveRenderer::build(),
                         std::move(mesh_renderer),
+                        std::move(particle_renderer),
                         GlLine::create(),
                         std::move(glgc));
     }
@@ -33,6 +35,7 @@ namespace merely3d
 
         primitive_renderer.render(shader_collection, buffer, camera, projection);
         mesh_renderer.render(shader_collection, buffer, camera, projection);
+        particle_renderer.render(shader_collection, buffer, camera, projection);
 
         // TODO: Create a LineRenderer class or similar to encapsulate
         // line rendering

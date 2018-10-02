@@ -158,6 +158,39 @@ namespace merely3d
         return shader;
     }
 
+
+    void ParticleShader::set_view_transform(const Eigen::Affine3f &view)
+    {
+        set_current_shader_view_transform(shader, view_loc, view);
+    }
+
+    void ParticleShader::set_projection_transform(const Eigen::Matrix4f &projection)
+    {
+        set_current_shader_projection_transform(shader, projection_loc, projection);
+    }
+
+    void ParticleShader::use()
+    {
+        shader.use();
+    }
+
+    ParticleShader ParticleShader::create_in_context() {
+
+        const auto particle_fragment_shader = Shader::compile(ShaderType::Fragment, shaders::particle_fragment);
+        const auto particle__vertex_shader = Shader::compile(ShaderType::Vertex, shaders::particle_vertex);
+        auto line_program = ShaderProgram::create();
+        line_program.attach(particle_fragment_shader);
+        line_program.attach(particle__vertex_shader);
+        line_program.link();
+
+        auto shader = ParticleShader(std::move(line_program));
+
+        shader.projection_loc = shader.shader.get_uniform_loc("projection");
+        shader.view_loc = shader.shader.get_uniform_loc("view");
+
+        return shader;
+    }
+
     MeshShader & ShaderCollection::mesh_shader()
     {
         return _mesh_shader;
@@ -168,9 +201,14 @@ namespace merely3d
         return _line_shader;
     }
 
+    ParticleShader &ShaderCollection::particle_shader() {
+        return _particle_shader;
+    }
+
     ShaderCollection ShaderCollection::create_in_context()
     {
-        return ShaderCollection(MeshShader::create_in_context(),
-                                LineShader::create_in_context());
+        return { MeshShader::create_in_context(),
+                 LineShader::create_in_context(),
+                 ParticleShader::create_in_context() };
     }
 }

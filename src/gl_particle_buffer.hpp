@@ -8,6 +8,7 @@
 
 #include <merely3d/primitives.hpp>
 #include "gl_gc.hpp"
+#include "gl_errors.hpp"
 
 namespace merely3d
 {
@@ -37,6 +38,13 @@ namespace merely3d
         void bind();
 
         void unbind();
+
+        /// Returns the number of particles in the buffer,
+        /// as decided by the most recent call to update_buffer.
+        ///
+        /// Note that the correct OpenGL context MUST be set prior to calling
+        /// this function.
+        GLsizei num_particles_in_buffer() const;
 
     private:
         GlParticleBuffer(const std::shared_ptr<GlGarbagePile> & garbage, GLuint vao, GLuint vbo)
@@ -75,17 +83,16 @@ namespace merely3d
         glBindVertexArray(vao);
         glGenBuffers(1, &vbo);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        // glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices_and_normals.size(), v, GL_STATIC_DRAW);
-        // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * triangles.size(), triangles.data(), GL_STATIC_DRAW);
 
         // Position attribute
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), nullptr);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), NULL);
         glEnableVertexAttribArray(0);
         // color attribute
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
         // radius attribute
         glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(6 * sizeof(float)));
+        glEnableVertexAttribArray(2);
 
         glBindVertexArray(0);
 
@@ -104,7 +111,8 @@ namespace merely3d
 
     inline void GlParticleBuffer::update_buffer(const Particle * particles, size_t num_particles)
     {
-        glBindVertexArray(_vao);
+        glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+        MERELY_CHECK_GL_ERRORS();
 
         _particle_data.resize(7 * num_particles);
 
@@ -121,7 +129,8 @@ namespace merely3d
         }
 
         GLint current_gpu_buffer_size = 0;
-        glGetBufferParameteriv(_vbo, GL_BUFFER_SIZE, &current_gpu_buffer_size);
+        glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &current_gpu_buffer_size);
+        MERELY_CHECK_GL_ERRORS();
 
         const auto buffer_size = static_cast<GLint>(sizeof(float) * _particle_data.size());
 
@@ -131,10 +140,17 @@ namespace merely3d
         if (current_gpu_buffer_size < buffer_size)
         {
             glBufferData(GL_ARRAY_BUFFER, buffer_size, nullptr, GL_STREAM_DRAW);
+            MERELY_CHECK_GL_ERRORS();
         }
 
         glBufferSubData(GL_ARRAY_BUFFER, 0, buffer_size, static_cast<const void*>(_particle_data.data()));
+        MERELY_CHECK_GL_ERRORS();
 
-        glBindVertexArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+
+    inline GLsizei GlParticleBuffer::num_particles_in_buffer() const {
+        assert(_particle_data.size() % 7 == 0);
+        return static_cast<GLsizei>(_particle_data.size() / 7);
     }
 }

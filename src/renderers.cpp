@@ -1,5 +1,6 @@
 #include "renderers.hpp"
 #include "mesh_util.hpp"
+#include "gl_errors.hpp"
 
 #include <Eigen/Dense>
 
@@ -312,5 +313,46 @@ namespace merely3d
             _mesh_cache.erase(id);
         }
 
+    }
+
+    void ParticleRenderer::render(ShaderCollection & shaders,
+                                  CommandBuffer & buffer,
+                                  const Camera & camera,
+                                  const Eigen::Matrix4f & projection)
+    {
+        (void)(shaders);
+        (void)(buffer);
+        (void)(camera);
+        (void)(projection);
+        // TODO: Render particles
+
+        auto & shader = shaders.particle_shader();
+
+        const Eigen::Affine3f view = camera.transform().inverse();
+
+        shader.use();
+        shader.set_view_transform(view);
+        shader.set_projection_transform(projection);
+
+        _particle_buffer.update_buffer(buffer.particles().data(), buffer.particles().size());
+        _particle_buffer.bind();
+
+        MERELY_CHECK_GL_ERRORS();
+
+        glEnable(GL_PROGRAM_POINT_SIZE);
+        // The following line MAY be required on Windows, or in some configurations. On the other hand,
+        // this caused an error on my Linux machine. TODO: Remove this once we know whether or not we need it.
+        // glEnable(0x8861/*GL_POINT_SPRITE*/); // should be enabled by default in OpenGL 3.3, but isn't
+        glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_LOWER_LEFT);
+        MERELY_CHECK_GL_ERRORS();
+
+        glDrawArrays(GL_POINTS, 0, _particle_buffer.num_particles_in_buffer());
+        MERELY_CHECK_GL_ERRORS();
+        _particle_buffer.unbind();
+    }
+
+    ParticleRenderer ParticleRenderer::build(const std::shared_ptr<GlGarbagePile> & garbage)
+    {
+        return ParticleRenderer(GlParticleBuffer::create(garbage));
     }
 }

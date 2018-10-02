@@ -52,6 +52,8 @@ set(LIB_FILES
     src/gl_triangle_mesh.hpp
     src/gl_gc.hpp
     src/gl_gc.cpp
+    src/gl_errors.hpp
+    src/gl_errors.cpp
     src/app.cpp
     src/mesh_util.hpp
     src/gl_line.hpp

@@ -30,20 +30,20 @@ namespace merely3d
         static MeshShader create_in_context();
 
     private:
-        MeshShader(ShaderProgram && shader)
+        explicit MeshShader(ShaderProgram && shader)
             : shader(std::move(shader))
         {}
 
-        GLint projection_loc;
-        GLint model_loc;
-        GLint view_loc;
-        GLint normal_transform_loc;
-        GLint object_color_loc;
-        GLint light_color_loc;
-        GLint light_dir_loc;
-        GLint camera_pos_loc;
-        GLint reference_transform_loc;
-        GLint pattern_grid_size_loc;
+        GLint projection_loc = 0;
+        GLint model_loc = 0;
+        GLint view_loc = 0;
+        GLint normal_transform_loc = 0;
+        GLint object_color_loc = 0;
+        GLint light_color_loc = 0;
+        GLint light_dir_loc = 0;
+        GLint camera_pos_loc = 0;
+        GLint reference_transform_loc = 0;
+        GLint pattern_grid_size_loc = 0;
 
         ShaderProgram shader;
     };
@@ -61,14 +61,35 @@ namespace merely3d
         static LineShader create_in_context();
 
     private:
-        LineShader(ShaderProgram && shader)
+        explicit LineShader(ShaderProgram && shader)
             : shader(std::move(shader))
         {}
 
-        GLint projection_loc;
-        GLint model_loc;
-        GLint view_loc;
-        GLint object_color_loc;
+        GLint projection_loc = 0;
+        GLint model_loc = 0;
+        GLint view_loc = 0;
+        GLint object_color_loc = 0;
+
+        ShaderProgram shader;
+    };
+
+    class ParticleShader
+    {
+    public:
+        void set_view_transform(const Eigen::Affine3f & view);
+        void set_projection_transform(const Eigen::Matrix4f & projection);
+
+        void use();
+
+        static ParticleShader create_in_context();
+
+    private:
+        explicit ParticleShader(ShaderProgram && shader)
+            : shader(std::move(shader))
+        {}
+
+        GLint projection_loc = 0;
+        GLint view_loc = 0;
 
         ShaderProgram shader;
     };
@@ -76,20 +97,24 @@ namespace merely3d
     class ShaderCollection
     {
     public:
-        MeshShader & mesh_shader();
-        LineShader & line_shader();
+        MeshShader &     mesh_shader();
+        LineShader &     line_shader();
+        ParticleShader & particle_shader();
 
         static ShaderCollection create_in_context();
 
     private:
         ShaderCollection(MeshShader && mesh_shader,
-                         LineShader && line_shader)
+                         LineShader && line_shader,
+                         ParticleShader && particle_shader)
             : _mesh_shader(std::move(mesh_shader)),
-              _line_shader(std::move(line_shader))
+              _line_shader(std::move(line_shader)),
+              _particle_shader(std::move(particle_shader))
         {}
 
-        MeshShader _mesh_shader;
-        LineShader _line_shader;
+        MeshShader      _mesh_shader;
+        LineShader      _line_shader;
+        ParticleShader  _particle_shader;
     };
 
 

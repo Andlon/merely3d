@@ -1,5 +1,6 @@
 #include <merely3d/app.hpp>
 #include <merely3d/window.hpp>
+#include <merely3d/camera_controller.hpp>
 
 #include <Eigen/Geometry>
 
@@ -9,11 +10,14 @@ using merely3d::Frame;
 using merely3d::Material;
 using merely3d::Color;
 using merely3d::Line;
+using merely3d::EventHandler;
+using merely3d::CameraController;
 
 using merely3d::renderable;
 using merely3d::Rectangle;
 using merely3d::Box;
 using merely3d::Sphere;
+using merely3d::Particle;
 
 using Eigen::Vector2f;
 using Eigen::Vector3f;
@@ -36,16 +40,31 @@ int main()
                 .multisampling(8)
                 .build();
 
-        for (int i = 0; i < 100 && !window.should_close(); ++i)
+        window.camera().look_in(Vector3f(1.0, 0.0, -1), Vector3f(0.0, 0.0, 1.0));
+        window.camera().set_position(Vector3f(-1.0, 0.0, 3.0));
+
+        window.add_event_handler(std::shared_ptr<EventHandler>(new CameraController));
+
+        const size_t num_particles_x = 10;
+        const size_t num_particles_y = 10;
+//        const size_t num_particles_z = 5;
+
+        while (!window.should_close())
         {
             window.render_frame([] (Frame & frame)
             {
-                frame.draw(renderable(Rectangle(0.5, 0.5))
-                            .with_position(1.0, 0.0, 0.5)
-                            .with_orientation(AngleAxisf(0.78, Vector3f(1.0f, 0.0f, 0.0f)))
-                            .with_material(Material().with_color(Color(0.5, 0.3, 0.3))));
+                for (size_t i = 0; i < num_particles_x; ++i)
+                {
+                    for (size_t j = 0; j < num_particles_y; ++j)
+                    {
+                        const auto x = static_cast<float>(i);
+                        const auto y = static_cast<float>(j);
+                        const auto z = static_cast<float>(0);
+                        frame.draw_particle(Particle().with_position(Vector3f(x, y, z)));
+                    }
+                }
 
-                frame.draw_line(Line(Vector3f(0.0, 0.0, 0.0), Vector3f(10.0, -5.0, 10.0)));
+                frame.draw_line(Line(Eigen::Vector3f(0.0, 0.0, 0.0), Eigen::Vector3f(0.0, 0.0, 1.0)));
             });
         }
     }
