@@ -169,6 +169,17 @@ namespace merely3d
         set_current_shader_projection_transform(shader, projection_loc, projection);
     }
 
+    void ParticleShader::set_viewport_dimensions(float width, float height)
+    {
+        shader.set_float_uniform(viewport_width_loc, width);
+        shader.set_float_uniform(viewport_height_loc, height);
+    }
+
+    void ParticleShader::set_near_plane_dist(float dist)
+    {
+        shader.set_float_uniform(near_plane_dist_loc, dist);
+    }
+
     void ParticleShader::use()
     {
         shader.use();
@@ -187,6 +198,9 @@ namespace merely3d
 
         shader.projection_loc = shader.shader.get_uniform_loc("projection");
         shader.view_loc = shader.shader.get_uniform_loc("view");
+        shader.viewport_width_loc = shader.shader.get_uniform_loc("viewport_width");
+        shader.viewport_height_loc = shader.shader.get_uniform_loc("viewport_width");
+        shader.near_plane_dist_loc = shader.shader.get_uniform_loc("near_plane_dist");
 
         return shader;
     }

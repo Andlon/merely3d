@@ -78,6 +78,8 @@ namespace merely3d
     public:
         void set_view_transform(const Eigen::Affine3f & view);
         void set_projection_transform(const Eigen::Matrix4f & projection);
+        void set_viewport_dimensions(float width, float height);
+        void set_near_plane_dist(float dist);
 
         void use();
 
@@ -90,6 +92,9 @@ namespace merely3d
 
         GLint projection_loc = 0;
         GLint view_loc = 0;
+        GLint viewport_width_loc = 0;
+        GLint viewport_height_loc = 0;
+        GLint near_plane_dist_loc = 0;
 
         ShaderProgram shader;
     };
