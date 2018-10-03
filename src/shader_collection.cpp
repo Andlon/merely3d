@@ -180,6 +180,17 @@ namespace merely3d
         shader.set_float_uniform(near_plane_dist_loc, dist);
     }
 
+    void ParticleShader::set_light_color(const Color & color)
+    {
+        const auto color_array = color.into_array();
+        shader.set_vec3_uniform(light_color_loc, color_array.data());
+    }
+
+    void ParticleShader::set_light_eye_direction(const Eigen::Vector3f & direction)
+    {
+        shader.set_vec3_uniform(light_eye_dir_loc, direction.data());
+    }
+
     void ParticleShader::use()
     {
         shader.use();
@@ -201,6 +212,8 @@ namespace merely3d
         shader.viewport_width_loc = shader.shader.get_uniform_loc("viewport_width");
         shader.viewport_height_loc = shader.shader.get_uniform_loc("viewport_height");
         shader.near_plane_dist_loc = shader.shader.get_uniform_loc("near_plane_dist");
+        shader.light_color_loc = shader.shader.get_uniform_loc("light_color");
+        shader.light_eye_dir_loc = shader.shader.get_uniform_loc("light_dir_eye");
 
         return shader;
     }

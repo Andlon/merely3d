@@ -337,11 +337,18 @@ namespace merely3d
         // we have that N = 1 / Y_w, where Y = P^-1 * n.
         const float near_plane_dist = 1.0 / (projection.inverse() * Eigen::Vector4f(0.0, 0.0, -1.0, 1.0)).w();
 
+        // TODO: Make lighting configurable rather than hard-coded
+        const auto light_color = Color(1.0, 1.0, 1.0);
+        const Eigen::Vector3f light_dir_world = Eigen::Vector3f(0.9, 1.2, -0.8).normalized();
+        const Eigen::Vector3f light_dir_eye = view.linear() * light_dir_world;
+
         shader.use();
         shader.set_view_transform(view);
         shader.set_projection_transform(projection);
         shader.set_viewport_dimensions(viewport_width, viewport_height);
         shader.set_near_plane_dist(near_plane_dist);
+        shader.set_light_color(light_color);
+        shader.set_light_eye_direction(light_dir_eye);
 
         _particle_buffer.update_buffer(buffer.particles().data(), buffer.particles().size());
         _particle_buffer.bind();

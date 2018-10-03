@@ -80,6 +80,8 @@ namespace merely3d
         void set_projection_transform(const Eigen::Matrix4f & projection);
         void set_viewport_dimensions(float width, float height);
         void set_near_plane_dist(float dist);
+        void set_light_color(const Color & color);
+        void set_light_eye_direction(const Eigen::Vector3f & direction);
 
         void use();
 
@@ -95,6 +97,8 @@ namespace merely3d
         GLint viewport_width_loc = 0;
         GLint viewport_height_loc = 0;
         GLint near_plane_dist_loc = 0;
+        GLint light_color_loc = 0;
+        GLint light_eye_dir_loc = 0;
 
         ShaderProgram shader;
     };

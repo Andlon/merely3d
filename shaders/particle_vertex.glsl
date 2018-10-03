@@ -17,5 +17,5 @@ void main()
     sphere_radius = radius;
     frag_color = color;
     gl_Position = projection * view_pos;
-    gl_PointSize = 1000;
+    gl_PointSize = 100;
 }

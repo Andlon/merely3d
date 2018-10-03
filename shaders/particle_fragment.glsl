@@ -6,6 +6,8 @@ in float sphere_radius;
 
 // TODO: Take inverse projection directly to avoid computing inverse in shader
 uniform mat4 projection;
+uniform vec3 light_color;
+uniform vec3 light_dir_eye;
 uniform float viewport_width;
 uniform float viewport_height;
 uniform float near_plane_dist;
@@ -20,7 +22,6 @@ vec3 compute_ray_direction()
     float ndc_y = 2.0 * (gl_FragCoord.y - viewport_height / 2.0) / viewport_height;
     vec4 ndc_point = vec4(ndc_x, ndc_y, -1.0, 1.0);
     vec4 view_point = inverse(projection) * near_plane_dist * ndc_point;
-
     return vec3(view_point);
 }
 
@@ -79,7 +80,22 @@ void main()
 
     if (t >= 0)
     {
-        FragColor = vec4(frag_color, 1.0);
+        vec3 x = t * ray;
+        vec3 normal = normalize(x - sphere_pos_view);
+
+        // Ambient
+        // TODO: Make strength configurable
+        float ambient_strength = 0.15;
+        vec3 ambient = ambient_strength * light_color;
+
+        // Diffuse
+        float diff = max(- dot(normal, light_dir_eye), 0.0);
+        vec3 diffuse = diff * light_color;
+
+        // TODO: Specular
+        vec3 result = (ambient + diffuse) * frag_color;
+
+        FragColor = vec4(result, 1.0);
     }
     else
     {
