@@ -10,7 +10,8 @@ namespace merely3d
     enum class ShaderType
     {
         Vertex,
-        Fragment
+        Fragment,
+        Geometry
     };
 
     // TODO: Cleanup shaders when they are not needed anymore, somehow?

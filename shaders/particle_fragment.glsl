@@ -1,8 +1,11 @@
 #version 330 core
 
-in vec3 frag_color;
-in vec3 sphere_pos_view;
-in float sphere_radius;
+in VertexData
+{
+    vec3 frag_color;
+    vec3 sphere_pos_view;
+    float sphere_radius;
+} vs_in;
 
 // TODO: Take inverse projection directly to avoid computing inverse in shader
 uniform mat4 projection;
@@ -76,7 +79,7 @@ float intersect_ray_sphere(vec3 ray_direction, vec3 sphere_center, float radius)
 void main()
 {
     vec3 ray = compute_ray_direction();
-    float t = intersect_ray_sphere(ray, sphere_pos_view, sphere_radius);
+    float t = intersect_ray_sphere(ray, vs_in.sphere_pos_view, vs_in.sphere_radius);
 
     if (t >= 0)
     {
@@ -89,7 +92,7 @@ void main()
         float window_depth = 0.5 * (ndc_z + 1.0);
         gl_FragDepth = gl_DepthRange.diff * window_depth + gl_DepthRange.near;
 
-        vec3 normal = normalize(x - sphere_pos_view);
+        vec3 normal = normalize(x - vs_in.sphere_pos_view);
 
         // Ambient
         // TODO: Make strength configurable
@@ -108,7 +111,7 @@ void main()
         float spec = pow(max(- dot(view_dir, reflect_dir), 0.0), 16);
         vec3 specular = specular_strength * spec * light_color;
 
-        vec3 result = (ambient + diffuse + specular) * frag_color;
+        vec3 result = (ambient + diffuse + specular) * vs_in.frag_color;
 
         FragColor = vec4(result, 1.0);
     }

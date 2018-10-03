@@ -200,9 +200,11 @@ namespace merely3d
 
         const auto particle_fragment_shader = Shader::compile(ShaderType::Fragment, shaders::particle_fragment);
         const auto particle__vertex_shader = Shader::compile(ShaderType::Vertex, shaders::particle_vertex);
+        const auto particle_geometry_shader = Shader::compile(ShaderType::Geometry, shaders::particle_geometry);
         auto line_program = ShaderProgram::create();
         line_program.attach(particle_fragment_shader);
         line_program.attach(particle__vertex_shader);
+        line_program.attach(particle_geometry_shader);
         line_program.link();
 
         auto shader = ParticleShader(std::move(line_program));

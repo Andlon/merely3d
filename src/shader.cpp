@@ -10,6 +10,7 @@ namespace merely3d
         {
             case ShaderType::Fragment: return GL_FRAGMENT_SHADER;
             case ShaderType::Vertex: return GL_VERTEX_SHADER;
+            case ShaderType::Geometry: return GL_GEOMETRY_SHADER;
             default: throw std::runtime_error("Unknown shader type");
         }
     }
