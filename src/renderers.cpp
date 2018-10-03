@@ -320,21 +320,22 @@ namespace merely3d
                                   const Camera & camera,
                                   const Eigen::Matrix4f & projection)
     {
-        // TODO: Render particles
-
         auto & shader = shaders.particle_shader();
 
         const Eigen::Affine3f view = camera.transform().inverse();
 
         GLint viewport[4];
         glGetIntegerv(GL_VIEWPORT, viewport);
-        float viewport_width = static_cast<float>(viewport[2]);
-        float viewport_height = static_cast<float>(viewport[3]);
+        const float viewport_width = static_cast<float>(viewport[2]);
+        const float viewport_height = static_cast<float>(viewport[3]);
 
-        // Compute the distance to the near plane by transforming from a point on the near plane in clip space
-        // to view space and taking the z coordinate.
-        const Eigen::Vector4f near_plane_center = projection.inverse() * Eigen::Vector4f(0.0, 0.0, -1.0, 1.0);
-        const float near_plane_dist = near_plane_center.z();
+        // Compute the distance to the near plane by transforming from a point on the near plane in
+        // NDC to view space. We have that
+        //  n = P * X / N,
+        // where N is the distance to the near plane, X = [x, 1] and x are the coordinate in
+        // view space, and n represents the coordinates in NDC. Letting Y = X / N,
+        // we have that N = 1 / Y_w, where Y = P^-1 * n.
+        const float near_plane_dist = 1.0 / (projection.inverse() * Eigen::Vector4f(0.0, 0.0, -1.0, 1.0)).w();
 
         shader.use();
         shader.set_view_transform(view);

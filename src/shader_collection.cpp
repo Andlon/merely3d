@@ -199,7 +199,7 @@ namespace merely3d
         shader.projection_loc = shader.shader.get_uniform_loc("projection");
         shader.view_loc = shader.shader.get_uniform_loc("view");
         shader.viewport_width_loc = shader.shader.get_uniform_loc("viewport_width");
-        shader.viewport_height_loc = shader.shader.get_uniform_loc("viewport_width");
+        shader.viewport_height_loc = shader.shader.get_uniform_loc("viewport_height");
         shader.near_plane_dist_loc = shader.shader.get_uniform_loc("near_plane_dist");
 
         return shader;
