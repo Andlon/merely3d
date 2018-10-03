@@ -80,7 +80,15 @@ void main()
 
     if (t >= 0)
     {
+        // The point x on the sphere (surface)
         vec3 x = t * ray;
+
+        // Compute correct depth for fragment
+        vec4 clip = projection * vec4(x, 1.0);
+        float ndc_z = clip.z / clip.w;
+        float window_depth = 0.5 * (ndc_z + 1.0);
+        gl_FragDepth = gl_DepthRange.diff * window_depth + gl_DepthRange.near;
+
         vec3 normal = normalize(x - sphere_pos_view);
 
         // Ambient
