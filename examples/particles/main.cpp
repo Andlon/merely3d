@@ -60,7 +60,10 @@ int main()
                         const auto x = static_cast<float>(i);
                         const auto y = static_cast<float>(j);
                         const auto z = static_cast<float>(0);
-                        frame.draw_particle(Particle().with_position(Vector3f(x, y, z)));
+                        frame.draw_particle(Particle()
+                            .with_position(Vector3f(x, y, z))
+                            .with_radius(0.2)
+                            .with_color(Color(105.0/255.0, 155.0/255.0, 234/255.0)));
                     }
                 }
 
