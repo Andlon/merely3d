@@ -350,7 +350,9 @@ namespace merely3d
         shader.set_light_color(light_color);
         shader.set_light_eye_direction(light_dir_eye);
 
-        _particle_buffer.update_buffer(buffer.particles().data(), buffer.particles().size());
+        assert(buffer.particle_data().size() % 7 == 0);
+        const auto num_particles = buffer.particle_data().size() / 7;
+        _particle_buffer.update_buffer(buffer.particle_data().data(), num_particles);
         _particle_buffer.bind();
 
         MERELY_CHECK_GL_ERRORS();
@@ -362,7 +364,7 @@ namespace merely3d
         glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_LOWER_LEFT);
         MERELY_CHECK_GL_ERRORS();
 
-        glDrawArrays(GL_POINTS, 0, _particle_buffer.num_particles_in_buffer());
+        glDrawArrays(GL_POINTS, 0, num_particles);
         MERELY_CHECK_GL_ERRORS();
         _particle_buffer.unbind();
     }

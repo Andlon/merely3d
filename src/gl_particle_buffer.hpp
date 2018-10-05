@@ -16,7 +16,7 @@ namespace merely3d
     class GlParticleBuffer
     {
     public:
-        GlParticleBuffer(GlParticleBuffer && other);
+        GlParticleBuffer(GlParticleBuffer && other) noexcept;
         ~GlParticleBuffer();
 
         GlParticleBuffer(const GlParticleBuffer & other) = delete;
@@ -33,18 +33,11 @@ namespace merely3d
         ///
         /// Note that the correct OpenGL context MUST be set prior to
         /// calling this function.
-        void update_buffer(const Particle * particles, size_t num_particles);
+        void update_buffer(const float * particles, size_t num_particles);
 
         void bind();
 
         void unbind();
-
-        /// Returns the number of particles in the buffer,
-        /// as decided by the most recent call to update_buffer.
-        ///
-        /// Note that the correct OpenGL context MUST be set prior to calling
-        /// this function.
-        GLsizei num_particles_in_buffer() const;
 
     private:
         GlParticleBuffer(const std::shared_ptr<GlGarbagePile> & garbage, GLuint vao, GLuint vbo)
@@ -54,14 +47,12 @@ namespace merely3d
         GLuint _vao;
         GLuint _vbo;
 
-        std::vector<float>             _particle_data;
         std::shared_ptr<GlGarbagePile> _garbage;
     };
 
-    inline GlParticleBuffer::GlParticleBuffer(GlParticleBuffer && other)
+    inline GlParticleBuffer::GlParticleBuffer(GlParticleBuffer && other) noexcept
         : _vao(other._vao),
           _vbo(other._vbo),
-          _particle_data(std::move(other._particle_data)),
           _garbage(other._garbage)
     {
         other._garbage.reset();
@@ -109,30 +100,18 @@ namespace merely3d
         glBindVertexArray(0);
     }
 
-    inline void GlParticleBuffer::update_buffer(const Particle * particles, size_t num_particles)
+    inline void GlParticleBuffer::update_buffer(const float * particle_data, size_t num_particles)
     {
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
         MERELY_CHECK_GL_ERRORS();
-
-        _particle_data.resize(7 * num_particles);
-
-        for (size_t i = 0; i < num_particles; ++i)
-        {
-            const auto & p = particles[i];
-            _particle_data[7 * i + 0] = p.position.x();
-            _particle_data[7 * i + 1] = p.position.y();
-            _particle_data[7 * i + 2] = p.position.z();
-            _particle_data[7 * i + 3] = p.color.r();
-            _particle_data[7 * i + 4] = p.color.g();
-            _particle_data[7 * i + 5] = p.color.b();
-            _particle_data[7 * i + 6] = p.radius;
-        }
 
         GLint current_gpu_buffer_size = 0;
         glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &current_gpu_buffer_size);
         MERELY_CHECK_GL_ERRORS();
 
-        const auto buffer_size = static_cast<GLint>(sizeof(float) * _particle_data.size());
+        constexpr size_t NUM_FLOATS_PER_PARTICLES = 7;
+
+        const auto buffer_size = static_cast<GLint>(sizeof(float) * NUM_FLOATS_PER_PARTICLES * num_particles);
 
         // TODO: Use geometric increments to avoid reallocating when a small number of
         // particles are added at each time step (which would then cause a full reallocation
@@ -143,14 +122,9 @@ namespace merely3d
             MERELY_CHECK_GL_ERRORS();
         }
 
-        glBufferSubData(GL_ARRAY_BUFFER, 0, buffer_size, static_cast<const void*>(_particle_data.data()));
+        glBufferSubData(GL_ARRAY_BUFFER, 0, buffer_size, static_cast<const void*>(particle_data));
         MERELY_CHECK_GL_ERRORS();
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-    }
-
-    inline GLsizei GlParticleBuffer::num_particles_in_buffer() const {
-        assert(_particle_data.size() % 7 == 0);
-        return static_cast<GLsizei>(_particle_data.size() / 7);
     }
 }

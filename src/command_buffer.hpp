@@ -29,14 +29,14 @@ namespace merely3d
         const std::vector<Renderable<Sphere>> &     spheres() const;
         const std::vector<Renderable<StaticMesh>> & meshes() const;
         const std::vector<Line> &                   lines() const;
-        const std::vector<Particle> &               particles() const;
+        const std::vector<float> &                  particle_data() const;
 
         std::vector<Renderable<Rectangle>> &  rectangles();
         std::vector<Renderable<Box>> &        boxes();
         std::vector<Renderable<Sphere>> &     spheres();
         std::vector<Renderable<StaticMesh>> & meshes();
         std::vector<Line> &                   lines();
-        std::vector<Particle> &               particles();
+        std::vector<float> &                  particle_data();
 
     private:
         std::vector<Renderable<Rectangle>>  _rectangles;
@@ -44,7 +44,7 @@ namespace merely3d
         std::vector<Renderable<Sphere>>     _spheres;
         std::vector<Renderable<StaticMesh>> _meshes;
         std::vector<Line>                   _lines;
-        std::vector<Particle>               _particles;
+        std::vector<float>                  _particle_data;
     };
 
     inline void CommandBuffer::clear()
@@ -54,7 +54,7 @@ namespace merely3d
         _spheres.clear();
         _meshes.clear();
         _lines.clear();
-        _particles.clear();
+        _particle_data.clear();
     }
 
     inline const std::vector<Renderable<Rectangle>> & CommandBuffer::rectangles() const
@@ -81,9 +81,9 @@ namespace merely3d
         return _lines;
     }
 
-    inline const std::vector<Particle> & CommandBuffer::particles() const
+    inline const std::vector<float> & CommandBuffer::particle_data() const
     {
-        return _particles;
+        return _particle_data;
     }
 
     inline std::vector<Renderable<Rectangle>> & CommandBuffer::rectangles()
@@ -111,9 +111,9 @@ namespace merely3d
         return _lines;
     }
 
-    inline std::vector<Particle> & CommandBuffer::particles()
+    inline std::vector<float> & CommandBuffer::particle_data()
     {
-        return _particles;
+        return _particle_data;
     }
 
     template<typename Shape>
@@ -153,7 +153,16 @@ namespace merely3d
 
     inline void CommandBuffer::push_particle(const Particle & particle)
     {
-        _particles.push_back(particle);
+        const auto & p = particle;
+        const auto offset = _particle_data.size();
+        _particle_data.resize(offset + 7);
+        _particle_data[offset + 0] = p.position.x();
+        _particle_data[offset + 1] = p.position.y();
+        _particle_data[offset + 2] = p.position.z();
+        _particle_data[offset + 3] = p.color.r();
+        _particle_data[offset + 4] = p.color.g();
+        _particle_data[offset + 5] = p.color.b();
+        _particle_data[offset + 6] = p.radius;
     }
 }
 
