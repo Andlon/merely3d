@@ -47,7 +47,7 @@ int main()
 
         const size_t num_particles_x = 10;
         const size_t num_particles_y = 10;
-//        const size_t num_particles_z = 5;
+        const size_t num_particles_z = 10;
 
         while (!window.should_close())
         {
@@ -57,13 +57,16 @@ int main()
                 {
                     for (size_t j = 0; j < num_particles_y; ++j)
                     {
-                        const auto x = static_cast<float>(i);
-                        const auto y = static_cast<float>(j);
-                        const auto z = static_cast<float>(0);
-                        frame.draw_particle(Particle()
-                            .with_position(Vector3f(x, y, z))
-                            .with_radius(0.2)
-                            .with_color(Color(105.0/255.0, 155.0/255.0, 234/255.0)));
+                        for (size_t k = 0; k < num_particles_z; ++k)
+                        {
+                            const auto x = static_cast<float>(i) / 2.0;
+                            const auto y = static_cast<float>(j) / 2.0;
+                            const auto z = static_cast<float>(k) / 2.0;
+                            frame.draw_particle(Particle()
+                                                        .with_position(Vector3f(x, y, z))
+                                                        .with_radius(0.2)
+                                                        .with_color(Color(105.0/255.0, 155.0/255.0, 234/255.0)));
+                        }
                     }
                 }
 
