@@ -167,6 +167,8 @@ namespace merely3d
     void ParticleShader::set_projection_transform(const Eigen::Matrix4f &projection)
     {
         set_current_shader_projection_transform(shader, projection_loc, projection);
+        const Eigen::Matrix4f inv_projection = projection.inverse();
+        shader.set_mat4_uniform(inv_projection_loc, inv_projection.data());
     }
 
     void ParticleShader::set_viewport_dimensions(float width, float height)
@@ -210,6 +212,7 @@ namespace merely3d
         auto shader = ParticleShader(std::move(line_program));
 
         shader.projection_loc = shader.shader.get_uniform_loc("projection");
+        shader.inv_projection_loc = shader.shader.get_uniform_loc("inv_projection");
         shader.view_loc = shader.shader.get_uniform_loc("view");
         shader.viewport_width_loc = shader.shader.get_uniform_loc("viewport_width");
         shader.viewport_height_loc = shader.shader.get_uniform_loc("viewport_height");

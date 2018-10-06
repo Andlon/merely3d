@@ -93,6 +93,7 @@ namespace merely3d
         {}
 
         GLint projection_loc = 0;
+        GLint inv_projection_loc = 0;
         GLint view_loc = 0;
         GLint viewport_width_loc = 0;
         GLint viewport_height_loc = 0;

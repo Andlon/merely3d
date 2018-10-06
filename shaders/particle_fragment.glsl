@@ -7,8 +7,8 @@ in VertexData
     float sphere_radius;
 } vs_in;
 
-// TODO: Take inverse projection directly to avoid computing inverse in shader
 uniform mat4 projection;
+uniform mat4 inv_projection;
 uniform vec3 light_color;
 uniform vec3 light_dir_eye;
 uniform float viewport_width;
@@ -24,7 +24,7 @@ vec3 compute_ray_direction()
     float ndc_x = 2.0 * (gl_FragCoord.x - viewport_width / 2.0) / viewport_width;
     float ndc_y = 2.0 * (gl_FragCoord.y - viewport_height / 2.0) / viewport_height;
     vec4 ndc_point = vec4(ndc_x, ndc_y, -1.0, 1.0);
-    vec4 view_point = inverse(projection) * near_plane_dist * ndc_point;
+    vec4 view_point = inv_projection * near_plane_dist * ndc_point;
     return vec3(view_point);
 }
 
