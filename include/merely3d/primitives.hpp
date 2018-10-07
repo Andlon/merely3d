@@ -54,6 +54,11 @@ namespace merely3d
                  float radius = DEFAULT_PARTICLE_RADIUS,
                  const Color & color = DEFAULT_PARTICLE_COLOR)
             : position(position), color(color), radius(radius) {}
+        Particle(float x, float y, float z,
+                 float radius = DEFAULT_PARTICLE_RADIUS,
+                 const Color & color = DEFAULT_PARTICLE_COLOR)
+            : Particle(Eigen::Vector3f(x, y, z), radius, color)
+        {}
 
         Eigen::Vector3f position;
         Color           color;
@@ -67,6 +72,11 @@ namespace merely3d
         Particle with_position(const Eigen::Vector3f & new_position) const
         {
             return Particle(new_position, radius, color);
+        }
+
+        Particle with_position(float x, float y, float z) const
+        {
+            return Particle(x, y, z, radius, color);
         }
 
         Particle with_color(const Color & new_color) const
