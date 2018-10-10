@@ -51,7 +51,7 @@ int main()
 
         while (!window.should_close())
         {
-            window.render_frame([] (Frame & frame)
+            window.render_frame([&] (Frame & frame)
             {
                 for (size_t i = 0; i < num_particles_x; ++i)
                 {
