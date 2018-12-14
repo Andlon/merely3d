@@ -85,7 +85,10 @@ namespace merely3d
                 // Compute left and right edge vectors that meet in local vertex (j + 1)
                 const Vector3f left = (face_vertices[j] - face_vertices[(j + 1) % 3]).normalized();
                 const Vector3f right = (face_vertices[(j + 2) % 3] - face_vertices[(j + 1) % 3]).normalized();
-                const float angle = std::acos(left.dot(right));
+                const float dot = left.dot(right);
+                // Rounding errors may push the dot product beyond the domain of acos, so we clamp the result
+                // to the allowed range [-1, 1]
+                const float angle = std::acos(std::max(-1.0f, std::min(dot, 1.0f)));
                 const auto vertex_index = triangle[(j + 1) % 3];
                 assert(vertex_index < vertices.size() / 3);
                 assert(std::isfinite(angle));
