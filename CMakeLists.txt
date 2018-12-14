@@ -60,7 +60,8 @@ set(LIB_FILES
     src/renderers.hpp
     src/renderers.cpp
     src/shader_collection.hpp
-    src/shader_collection.cpp)
+    src/shader_collection.cpp
+    src/mesh.cpp)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
     add_compile_options(-Werror -Wall -Wextra)
