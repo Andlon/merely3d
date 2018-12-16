@@ -106,6 +106,6 @@ namespace merely3d
             normals[i + 2] = normal[2];
         }
 
-        return StaticMesh(vertices, normals, faces);
+        return StaticMesh(std::move(vertices), std::move(normals), std::move(faces));
     }
 }
