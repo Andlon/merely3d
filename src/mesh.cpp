@@ -77,7 +77,7 @@ namespace merely3d
             const auto v2 = Vector3f(vertices[3 * triangle[2]], vertices[3 * triangle[2] + 1], vertices[3 * triangle[2] + 2]);
 
             const auto face_vertices = std::array<Vector3f, 3> { v0, v1, v2 };
-            const Vector3f face_normal = (v1 - v0).cross(v2 - v0).normalized();
+            const Vector3f face_normal = (v1 - v0).cross(v2 - v0);
 
             // For each vertex in the face, compute contribution to angle-weighted vertex normals
             for (size_t j = 0; j < 3; ++j)
