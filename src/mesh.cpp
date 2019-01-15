@@ -2,6 +2,9 @@
 
 #include <Eigen/Dense>
 
+#include <array>
+
+
 using Eigen::Vector3f;
 
 namespace merely3d
