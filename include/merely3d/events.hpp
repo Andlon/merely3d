@@ -239,5 +239,12 @@ namespace merely3d
             MERELY_UNUSED(window);
             MERELY_UNUSED(frame_duration);
         }
+
+        virtual void framebuffer_resize(Window & window, int width, int height)
+        {
+            MERELY_UNUSED(window);
+            MERELY_UNUSED(width);
+            MERELY_UNUSED(height);
+        }
     };
 }

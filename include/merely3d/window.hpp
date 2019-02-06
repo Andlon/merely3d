@@ -108,6 +108,7 @@ namespace merely3d
         friend void dispatch_character_input_event(Window * window, unsigned int codepoint);
         friend void dispatch_scroll_event(Window * window, double xoffset, double yoffset);
         friend void dispatch_mouse_enter_event(Window * window, bool entered);
+        friend void dispatch_framebuffer_resize_event(Window *window, int width, int height);
         class WindowData;
 
         Window(WindowData * data);
