@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 
+project(merely3d)
+
 set (CMAKE_CXX_STANDARD 11)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/embed_shaders.cmake)
